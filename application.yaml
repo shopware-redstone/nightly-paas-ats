@@ -9,7 +9,7 @@ app:
       value: "0"
       scope: RUN
     - name: APP_URL
-      value: "https://yt-paas-trunk-49f2c255-7233-4b04-a799-53831513f64a.production.shopware.shop"
+      value: "https://nightly-ats-trunk-479489b2-6c96-4849-89c1-bcbb0d766bb4.production.shopware.shop"
       scope: RUN
 services:
   mysql:

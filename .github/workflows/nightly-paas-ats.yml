@@ -1,0 +1,147 @@
+name: Nightly PaaS ATS
+
+on:
+  schedule:
+    # Runs every night at 02:17 UTC. Avoid minute 0 to reduce GitHub Actions schedule delays.
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force deployment even if composer.lock did not change"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly-paas-ats
+  cancel-in-progress: false
+
+jobs:
+  update-and-deploy:
+    name: Update and deploy ${{ matrix.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: trunk
+            branch: paas/trunk
+            application: nightly-paas-ats-trunk
+
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          # Use a PAT so the pushed commit can trigger downstream workflows.
+          # Fall back to the default GITHUB_TOKEN if no PAT is configured.
+          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: grpc, opentelemetry, redis
+          tools: composer:v2
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ matrix.name }}-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ matrix.name }}-
+            ${{ runner.os }}-composer-
+
+      - name: Configure Composer for GitHub rate limits
+        run: composer config -g github-oauth.github.com "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Update composer.lock
+        run: composer update shopware/platform --with-all-dependencies --no-interaction --no-scripts --no-install
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet composer.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to composer.lock."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "composer.lock has been updated."
+            git diff --stat composer.lock
+          fi
+
+      - name: Commit and push updated composer.lock
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add composer.lock
+          git commit -m "chore(${{ matrix.name }}): update composer.lock [skip ci]"
+          git push origin "HEAD:${{ matrix.branch }}"
+
+      - name: Install Shopware PaaS CLI
+        if: steps.changes.outputs.changed == 'true' || inputs.force == true
+        shell: bash
+        env:
+          SW_PAAS_DIR: ${{ runner.temp }}/sw-paas
+        run: |
+          set -euo pipefail
+          curl -fsSL https://install.sw-paas-cli.shopware.systems | sh
+          echo "$SW_PAAS_DIR/bin" >> "$GITHUB_PATH"
+          "$SW_PAAS_DIR/bin/sw-paas" --version
+
+      - name: Deploy updated application
+        if: steps.changes.outputs.changed == 'true' || inputs.force == true
+        env:
+          SW_PAAS_TOKEN: ${{ secrets.SW_PAAS_TOKEN }}
+          SW_PAAS_ORGANIZATION: ${{ vars.SW_PAAS_ORGANIZATION }}
+          SW_PAAS_PROJECT: ${{ vars.SW_PAAS_PROJECT }}
+          SW_PAAS_APPLICATION: ${{ matrix.application }}
+        run: |
+          set -euo pipefail
+          SW_PAAS_ORGANIZATION="${SW_PAAS_ORGANIZATION:-shopware-qa}"
+
+          : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
+          : "${SW_PAAS_ORGANIZATION:?Missing PaaS organization}"
+          : "${SW_PAAS_PROJECT:?Missing GitHub Actions variable SW_PAAS_PROJECT}"
+          : "${SW_PAAS_APPLICATION:?Missing PaaS application}"
+
+          commit_sha="$(git rev-parse HEAD)"
+          max_attempts=3
+          retry_delay_seconds=120
+
+          for attempt in $(seq 1 "$max_attempts"); do
+            echo "::group::PaaS deploy attempt ${attempt}/${max_attempts}"
+
+            if sw-paas application update \
+              --token "$SW_PAAS_TOKEN" \
+              --organization "$SW_PAAS_ORGANIZATION" \
+              --project "$SW_PAAS_PROJECT" \
+              --application "$SW_PAAS_APPLICATION" \
+              --commit-sha "$commit_sha"; then
+              echo "::endgroup::"
+              exit 0
+            else
+              exit_code=$?
+            fi
+
+            echo "::endgroup::"
+
+            if [[ "$attempt" -eq "$max_attempts" ]]; then
+              echo "PaaS deployment failed after ${max_attempts} attempts."
+              exit "$exit_code"
+            fi
+
+            echo "PaaS deployment attempt ${attempt} failed; retrying in ${retry_delay_seconds}s."
+            sleep "$retry_delay_seconds"
+          done

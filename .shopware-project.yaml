@@ -1,0 +1,14 @@
+deployment:
+  hooks:
+    # dev-trunk can keep the same Shopware version while adding migrations.
+    # Apply additive core migrations before deployment-helper update tools read new columns.
+    pre-update: |
+      php bin/console -n database:migrate --all
+
+build:
+  hooks:
+    pre-assets:
+      - 'SHOPWARE_SKIP_ENTITY_SCHEMA_DUMP=1 bin/build-administration.sh'
+      - 'SHOPWARE_SKIP_THEME_COMPILE=1 bin/build-storefront.sh'
+      - 'mkdir -p public/bundles/administration/administration'
+      - 'cp -R vendor/shopware/platform/src/Administration/Resources/public/administration/. public/bundles/administration/administration/'

@@ -1,0 +1,5 @@
+# see https://github.com/shopwareLabs/opentelemetry/blob/main/README.md
+shopware:
+    profiler:
+        integrations:
+            - OpenTelemetry

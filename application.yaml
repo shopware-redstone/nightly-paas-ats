@@ -1,0 +1,18 @@
+app:
+  php:
+    version: "8.4"
+  environment_variables:
+    - name: APP_ENV
+      value: "production"
+      scope: RUN
+    - name: APP_DEBUG
+      value: "0"
+      scope: RUN
+    - name: APP_URL
+      value: "https://yt-paas-trunk-49f2c255-7233-4b04-a799-53831513f64a.production.shopware.shop"
+      scope: RUN
+services:
+  mysql:
+    version: "8.0"
+  opensearch:
+    enabled: false

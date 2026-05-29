@@ -30,7 +30,7 @@ jobs:
         include:
           - name: trunk
             branch: paas/trunk
-            application: nightly-paas-ats-trunk
+            application: nightly-ats-trunk
 
     steps:
       - name: Checkout target branch

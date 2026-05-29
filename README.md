@@ -20,7 +20,7 @@ PaaS application branches are separate because Shopware PaaS builds from the rep
 
 | Target | Branch | PaaS application | Composer constraint |
 | --- | --- | --- | --- |
-| trunk | `paas/trunk` | `nightly-paas-ats-trunk` | `dev-trunk` |
+| trunk | `paas/trunk` | `nightly-ats-trunk` | `dev-trunk` |
 
 ## Required GitHub Configuration
 

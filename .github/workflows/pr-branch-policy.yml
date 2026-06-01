@@ -1,0 +1,28 @@
+name: PR Branch Policy
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  block-paas-branches-into-main:
+    name: Block paas branches into main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate source branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "base=${BASE_REF}"
+          echo "head=${HEAD_REF}"
+
+          if [[ "$BASE_REF" == "main" && "$HEAD_REF" == paas/* ]]; then
+            echo "::error::paas/* branches are deployment branches and must not be merged into main."
+            exit 1
+          fi

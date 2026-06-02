@@ -28,12 +28,20 @@ Secrets:
 
 - `SW_PAAS_TOKEN`: PaaS token used by the workflow to update and deploy the application.
 - `COMPOSER_UPDATE_TOKEN`: optional PAT used for pushing lock-file updates. If it is not configured, the workflow falls back to `GITHUB_TOKEN`.
+- `ATS_SHOPWARE_ACCESS_KEY_ID_TRUNK`: Shopware Admin API integration access key used by ATS for trunk.
+- `ATS_SHOPWARE_SECRET_ACCESS_KEY_TRUNK`: Shopware Admin API integration secret used by ATS for trunk.
 - `SLACK_WEBHOOK_URL`: optional Slack Incoming Webhook URL used to post nightly deployment status.
 
 Variables:
 
 - `SW_PAAS_PROJECT`: PaaS project name.
 - `SW_PAAS_ORGANIZATION`: optional; defaults to `shopware-qa` when empty.
+- `ATS_APP_URL_TRUNK`: public URL of the deployed trunk PaaS application.
+
+Each ATS matrix target resolves its configuration through `ats_config_suffix`. The current
+trunk target uses `TRUNK`, so future `paas/*` targets should add their own safe suffix and matching
+`ATS_APP_URL_<SUFFIX>`, `ATS_SHOPWARE_ACCESS_KEY_ID_<SUFFIX>`, and
+`ATS_SHOPWARE_SECRET_ACCESS_KEY_<SUFFIX>` entries.
 
 ## Workflow
 
@@ -46,6 +54,9 @@ For each target, the workflow:
 3. Commits and pushes `composer.lock` when it changed.
 4. Updates the matching Shopware PaaS application.
 5. Retries transient PaaS deployment failures up to three times.
-6. Posts deployment status to Slack when `SLACK_WEBHOOK_URL` is configured.
+6. Runs `shopware/shopware` ATS smoke coverage against the deployed URL.
+7. Uploads Playwright `test-results` and `playwright-report` artifacts.
+8. Posts deployment status to Slack when `SLACK_WEBHOOK_URL` is configured.
 
-ATS execution will be added after the trunk PaaS target is stable in this repository.
+The current ATS smoke target is the trunk storefront search spec:
+`tests/acceptance/tests/Search/ProductSearch.spec.ts`.

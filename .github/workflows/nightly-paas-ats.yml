@@ -243,3 +243,71 @@ jobs:
 
           curl -fsS -H "Content-Type: application/json" -d "$payload" "$SLACK_WEBHOOK_URL" \
             || echo "Slack notification failed."
+
+  ats-smoke:
+    name: ATS smoke ${{ matrix.name }}
+    needs: update-and-deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: trunk
+            shopware_ref: trunk
+            # Resolves ATS_APP_URL_TRUNK and ATS_SHOPWARE_*_TRUNK.
+            ats_config_suffix: TRUNK
+            spec: tests/Search/ProductSearch.spec.ts
+
+    env:
+      ATS_CONFIG_SUFFIX: ${{ matrix.ats_config_suffix }}
+      APP_URL: ${{ vars[format('ATS_APP_URL_{0}', matrix.ats_config_suffix)] || secrets[format('ATS_APP_URL_{0}', matrix.ats_config_suffix)] }}
+      SHOPWARE_ACCESS_KEY_ID: ${{ secrets[format('ATS_SHOPWARE_ACCESS_KEY_ID_{0}', matrix.ats_config_suffix)] }}
+      SHOPWARE_SECRET_ACCESS_KEY: ${{ secrets[format('ATS_SHOPWARE_SECRET_ACCESS_KEY_{0}', matrix.ats_config_suffix)] }}
+
+    steps:
+      - name: Checkout Shopware
+        uses: actions/checkout@v4
+        with:
+          repository: shopware/shopware
+          ref: ${{ matrix.shopware_ref }}
+          path: shopware
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: shopware/tests/acceptance/package-lock.json
+
+      - name: Validate ATS configuration
+        run: |
+          : "${APP_URL:?Missing GitHub Actions variable or secret ATS_APP_URL_${ATS_CONFIG_SUFFIX}}"
+          : "${SHOPWARE_ACCESS_KEY_ID:?Missing GitHub Actions secret ATS_SHOPWARE_ACCESS_KEY_ID_${ATS_CONFIG_SUFFIX}}"
+          : "${SHOPWARE_SECRET_ACCESS_KEY:?Missing GitHub Actions secret ATS_SHOPWARE_SECRET_ACCESS_KEY_${ATS_CONFIG_SUFFIX}}"
+
+      - name: Install ATS dependencies
+        working-directory: shopware/tests/acceptance
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: shopware/tests/acceptance
+        run: npx playwright install --with-deps chromium
+
+      - name: Run ATS smoke spec
+        working-directory: shopware/tests/acceptance
+        run: npx playwright test --workers=1 --project=Platform ${{ matrix.spec }}
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ats-smoke-${{ matrix.name }}-${{ github.run_id }}
+          path: |
+            shopware/tests/acceptance/test-results/
+            shopware/tests/acceptance/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -28,6 +28,7 @@ Secrets:
 
 - `SW_PAAS_TOKEN`: PaaS token used by the workflow to update and deploy the application.
 - `COMPOSER_UPDATE_TOKEN`: optional PAT used for pushing lock-file updates. If it is not configured, the workflow falls back to `GITHUB_TOKEN`.
+- `SLACK_WEBHOOK_URL`: optional Slack Incoming Webhook URL used to post nightly deployment status.
 
 Variables:
 
@@ -45,5 +46,6 @@ For each target, the workflow:
 3. Commits and pushes `composer.lock` when it changed.
 4. Updates the matching Shopware PaaS application.
 5. Retries transient PaaS deployment failures up to three times.
+6. Posts deployment status to Slack when `SLACK_WEBHOOK_URL` is configured.
 
 ATS execution will be added after the trunk PaaS target is stable in this repository.

@@ -23,6 +23,12 @@ jobs:
   update-and-deploy:
     name: Update and deploy ${{ matrix.name }}
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_STAGE: Checkout target branch
+      DEPLOY_DECISION: pending
+      DEPLOY_TARGET: ${{ matrix.name }}
+      DEPLOY_BRANCH: ${{ matrix.branch }}
+      DEPLOY_APPLICATION: ${{ matrix.application }}
 
     strategy:
       fail-fast: false
@@ -40,6 +46,9 @@ jobs:
           # Use a PAT so the pushed commit can trigger downstream workflows.
           # Fall back to the default GITHUB_TOKEN if no PAT is configured.
           token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Mark setup stage
+        run: echo "DEPLOY_STAGE=Set up PHP" >> "$GITHUB_ENV"
 
       - name: Set up PHP 8.4
         uses: shivammathur/setup-php@v2
@@ -66,16 +75,21 @@ jobs:
         run: composer config -g github-oauth.github.com "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Update composer.lock
-        run: composer update shopware/platform --with-all-dependencies --no-interaction --no-scripts --no-install
+        run: |
+          echo "DEPLOY_STAGE=Composer update" >> "$GITHUB_ENV"
+          composer update shopware/platform --with-all-dependencies --no-interaction --no-scripts --no-install
 
       - name: Check for changes
         id: changes
         run: |
+          echo "DEPLOY_STAGE=Check composer.lock changes" >> "$GITHUB_ENV"
           if git diff --quiet composer.lock; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "DEPLOY_CHANGED=false" >> "$GITHUB_ENV"
             echo "No changes to composer.lock."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "DEPLOY_CHANGED=true" >> "$GITHUB_ENV"
             echo "composer.lock has been updated."
             git diff --stat composer.lock
           fi
@@ -83,11 +97,24 @@ jobs:
       - name: Commit and push updated composer.lock
         if: steps.changes.outputs.changed == 'true'
         run: |
+          echo "DEPLOY_STAGE=Commit and push composer.lock" >> "$GITHUB_ENV"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add composer.lock
           git commit -m "chore(${{ matrix.name }}): update composer.lock [skip ci]"
           git push origin "HEAD:${{ matrix.branch }}"
+
+      - name: Record deployment decision
+        env:
+          FORCE_DEPLOY: ${{ inputs.force || false }}
+        run: |
+          if [[ "${{ steps.changes.outputs.changed }}" == "true" || "$FORCE_DEPLOY" == "true" ]]; then
+            echo "DEPLOY_DECISION=deploy" >> "$GITHUB_ENV"
+            echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"
+          else
+            echo "DEPLOY_DECISION=skipped" >> "$GITHUB_ENV"
+            echo "DEPLOY_STAGE=No composer.lock changes" >> "$GITHUB_ENV"
+          fi
 
       - name: Install Shopware PaaS CLI
         if: steps.changes.outputs.changed == 'true' || inputs.force == true
@@ -98,6 +125,7 @@ jobs:
           SW_PAAS_CLI_SHA256: b6e4e0fa2044a460a34402bbe3e4b4b3b955aa3c21598715a342d3f89457f769
         run: |
           set -euo pipefail
+          echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"
 
           archive="${RUNNER_TEMP}/sw-paas_Linux_x86_64.tar.gz"
           download_url="https://github.com/shopware/sw-paas/releases/download/${SW_PAAS_CLI_VERSION}/sw-paas_Linux_x86_64.tar.gz"
@@ -120,6 +148,7 @@ jobs:
           SW_PAAS_APPLICATION: ${{ matrix.application }}
         run: |
           set -euo pipefail
+          echo "DEPLOY_STAGE=Shopware PaaS application update" >> "$GITHUB_ENV"
           SW_PAAS_ORGANIZATION="${SW_PAAS_ORGANIZATION:-shopware-qa}"
 
           : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
@@ -140,6 +169,7 @@ jobs:
               --project "$SW_PAAS_PROJECT" \
               --application "$SW_PAAS_APPLICATION" \
               --commit-sha "$commit_sha"; then
+              echo "DEPLOY_STAGE=Deployment completed" >> "$GITHUB_ENV"
               echo "::endgroup::"
               exit 0
             else
@@ -156,3 +186,60 @@ jobs:
             echo "PaaS deployment attempt ${attempt} failed; retrying in ${retry_delay_seconds}s."
             sleep "$retry_delay_seconds"
           done
+
+      - name: Notify Slack deployment status
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
+            echo "SLACK_WEBHOOK_URL is not configured; skipping Slack notification."
+            exit 0
+          fi
+
+          if [[ "${DEPLOY_DECISION:-pending}" == "skipped" && "$JOB_STATUS" == "success" ]]; then
+            result="skipped"
+            summary="No deployment needed; composer.lock did not change."
+          elif [[ "$JOB_STATUS" == "success" ]]; then
+            result="success"
+            summary="Deployment completed."
+          else
+            result="failure"
+            summary="Deployment workflow failed during: ${DEPLOY_STAGE:-unknown}."
+          fi
+
+          short_sha="${COMMIT_SHA:0:8}"
+          payload="$(jq -n \
+            --arg text "Nightly PaaS deployment ${result}: ${DEPLOY_APPLICATION}" \
+            --arg result "$result" \
+            --arg summary "$summary" \
+            --arg stage "${DEPLOY_STAGE:-unknown}" \
+            --arg target "${DEPLOY_TARGET:-unknown}" \
+            --arg branch "${DEPLOY_BRANCH:-unknown}" \
+            --arg application "${DEPLOY_APPLICATION:-unknown}" \
+            --arg changed "${DEPLOY_CHANGED:-unknown}" \
+            --arg commit "$short_sha" \
+            --arg run "$RUN_URL" \
+            '{
+              text: $text,
+              blocks: [
+                {type: "section", text: {type: "mrkdwn", text: "*Nightly PaaS deployment:* \($result)\n\($summary)"}},
+                {type: "section", fields: [
+                  {type: "mrkdwn", text: "*Target:*\n\($target)"},
+                  {type: "mrkdwn", text: "*Application:*\n\($application)"},
+                  {type: "mrkdwn", text: "*Branch:*\n\($branch)"},
+                  {type: "mrkdwn", text: "*Commit:*\n`\($commit)`"},
+                  {type: "mrkdwn", text: "*Stage:*\n\($stage)"},
+                  {type: "mrkdwn", text: "*Lock changed:*\n\($changed)"}
+                ]},
+                {type: "section", text: {type: "mrkdwn", text: "*Run:* <\($run)|Open GitHub Actions>"}}
+              ]
+            }')"
+
+          curl -fsS -H "Content-Type: application/json" -d "$payload" "$SLACK_WEBHOOK_URL" \
+            || echo "Slack notification failed."

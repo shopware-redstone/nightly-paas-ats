@@ -43,6 +43,9 @@ trunk target uses `TRUNK`, so future `paas/*` targets should add their own safe 
 `ATS_APP_URL_<SUFFIX>`, `ATS_SHOPWARE_ACCESS_KEY_ID_<SUFFIX>`, and
 `ATS_SHOPWARE_SECRET_ACCESS_KEY_<SUFFIX>` entries.
 
+ATS runs set `SHOPWARE_ACCEPTANCE_INSTANCE_TYPE=paas` so the upstream acceptance suite can
+apply PaaS-specific behavior once it supports that signal.
+
 ## Workflow
 
 The nightly workflow runs at `02:17 UTC`. It avoids minute `0` because GitHub Actions scheduled workflows are often delayed at the top of the hour.
@@ -59,4 +62,6 @@ For each target, the workflow:
 8. Posts deployment status to Slack when `SLACK_WEBHOOK_URL` is configured.
 
 The current ATS smoke target is the trunk storefront search spec:
-`tests/acceptance/tests/Search/ProductSearch.spec.ts`.
+`tests/acceptance/tests/Search/ProductSearch.spec.ts`. It creates two basic products
+through ATS, clears caches, and verifies that the deployed storefront can find the created
+content through search suggestions and the search results page.

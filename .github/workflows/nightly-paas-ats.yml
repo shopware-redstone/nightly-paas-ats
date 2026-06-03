@@ -260,10 +260,12 @@ jobs:
             shopware_ref: trunk
             # Resolves ATS_APP_URL_TRUNK and ATS_SHOPWARE_*_TRUNK.
             ats_config_suffix: TRUNK
+            # Creates products via ATS and verifies storefront search.
             spec: tests/Search/ProductSearch.spec.ts
 
     env:
       ATS_CONFIG_SUFFIX: ${{ matrix.ats_config_suffix }}
+      SHOPWARE_ACCEPTANCE_INSTANCE_TYPE: paas
       APP_URL: ${{ vars[format('ATS_APP_URL_{0}', matrix.ats_config_suffix)] || secrets[format('ATS_APP_URL_{0}', matrix.ats_config_suffix)] }}
       SHOPWARE_ACCESS_KEY_ID: ${{ secrets[format('ATS_SHOPWARE_ACCESS_KEY_ID_{0}', matrix.ats_config_suffix)] }}
       SHOPWARE_SECRET_ACCESS_KEY: ${{ secrets[format('ATS_SHOPWARE_SECRET_ACCESS_KEY_{0}', matrix.ats_config_suffix)] }}
@@ -297,7 +299,7 @@ jobs:
         working-directory: shopware/tests/acceptance
         run: npx playwright install --with-deps chromium
 
-      - name: Run ATS smoke spec
+      - name: Run ATS content smoke spec
         working-directory: shopware/tests/acceptance
         run: npx playwright test --workers=1 --project=Platform ${{ matrix.spec }}
 

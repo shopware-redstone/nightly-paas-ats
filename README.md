@@ -58,10 +58,18 @@ For each target, the workflow:
 4. Updates the matching Shopware PaaS application.
 5. Retries transient PaaS deployment failures up to three times.
 6. Runs `shopware/shopware` ATS smoke coverage against the deployed URL.
-7. Uploads Playwright `test-results` and `playwright-report` artifacts.
-8. Posts deployment status to Slack when `SLACK_WEBHOOK_URL` is configured.
+7. Optionally runs the full ATS `Platform` project when manually dispatched with
+   `run_platform_suite=true`.
+8. Uploads Playwright `test-results` and `playwright-report` artifacts.
+9. Posts deployment status to Slack when `SLACK_WEBHOOK_URL` is configured.
 
 The current ATS smoke target is the trunk storefront search spec:
 `tests/acceptance/tests/Search/ProductSearch.spec.ts`. It creates two basic products
 through ATS, clears caches, and verifies that the deployed storefront can find the created
 content through search suggestions and the search results page.
+
+The optional ATS Platform suite runs:
+`npx playwright test --workers=1 --project=Platform`. It is manual-only and non-blocking
+while PaaS coverage is being expanded, because it is used to discover which upstream tests
+need explicit PaaS handling. Install, update, and other non-Platform projects are not part
+of this workflow yet.

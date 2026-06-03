@@ -7077,13 +7077,13 @@
             "version": "dev-trunk",
             "source": {
                 "type": "git",
-                "url": "https://github.com/shopware/shopware",
-                "reference": "7ca10590c081cd61aea31f976d384cd7421a9191"
+                "url": "https://github.com/shopware/shopware.git",
+                "reference": "9b0293fbd3bfb9f0867aee2d6b987f8f21f3a6e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/7ca10590c081cd61aea31f976d384cd7421a9191",
-                "reference": "7ca10590c081cd61aea31f976d384cd7421a9191",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/9b0293fbd3bfb9f0867aee2d6b987f8f21f3a6e7",
+                "reference": "9b0293fbd3bfb9f0867aee2d6b987f8f21f3a6e7",
                 "shasum": ""
             },
             "require": {
@@ -7237,7 +7237,7 @@
                 "nikic/php-parser": "^5.4.0",
                 "opis/json-schema": "^2.3.0",
                 "phpat/phpat": "0.12.4",
-                "phpbench/phpbench": "^1.2.15",
+                "phpbench/phpbench": "^1.6.1",
                 "phpdocumentor/reflection-docblock": "^5.6.4",
                 "phpdocumentor/type-resolver": "^1.7.1",
                 "phpstan/extension-installer": "^1.4.3",
@@ -7313,9 +7313,10 @@
                 "docs": "https://developer.shopware.com",
                 "forum": "https://forum.shopware.com",
                 "issues": "https://github.com/shopware/shopware/issues",
+                "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-05-28T11:15:32+00:00"
+            "time": "2026-06-03T01:00:21+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

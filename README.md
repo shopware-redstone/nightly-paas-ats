@@ -30,7 +30,7 @@ Secrets:
 - `COMPOSER_UPDATE_TOKEN`: optional PAT used for pushing lock-file updates. If it is not configured, the workflow falls back to `GITHUB_TOKEN`.
 - `ATS_SHOPWARE_ACCESS_KEY_ID_TRUNK`: Shopware Admin API integration access key used by ATS for trunk.
 - `ATS_SHOPWARE_SECRET_ACCESS_KEY_TRUNK`: Shopware Admin API integration secret used by ATS for trunk.
-- `SLACK_WEBHOOK_URL`: optional Slack Incoming Webhook URL used to post nightly deployment status.
+- `SLACK_WEBHOOK_URL`: optional Slack Incoming Webhook URL used to post nightly deployment and ATS status.
 
 Variables:
 
@@ -57,19 +57,15 @@ For each target, the workflow:
 3. Commits and pushes `composer.lock` when it changed.
 4. Updates the matching Shopware PaaS application.
 5. Retries transient PaaS deployment failures up to three times.
-6. Runs `shopware/shopware` ATS smoke coverage against the deployed URL.
-7. Optionally runs the full ATS `Platform` project when manually dispatched with
-   `run_platform_suite=true`.
-8. Uploads Playwright `test-results` and `playwright-report` artifacts.
-9. Posts deployment status to Slack when `SLACK_WEBHOOK_URL` is configured.
+6. Runs the full `shopware/shopware` ATS `Platform` project against the deployed URL.
+7. Splits the Platform project into two Playwright shards to reduce wall-clock runtime.
+8. Uploads Playwright `test-results` and `playwright-report` artifacts for each shard.
+9. Posts combined deployment and ATS status to Slack when `SLACK_WEBHOOK_URL` is configured.
 
-The current ATS smoke target is the trunk storefront search spec:
-`tests/acceptance/tests/Search/ProductSearch.spec.ts`. It creates two basic products
-through ATS, clears caches, and verifies that the deployed storefront can find the created
-content through search suggestions and the search results page.
+The ATS Platform suite runs:
+`npx playwright test --workers=1 --project=Platform --shard=<shard>/2`.
 
-The optional ATS Platform suite runs:
-`npx playwright test --workers=1 --project=Platform`. It is manual-only and non-blocking
-while PaaS coverage is being expanded, because it is used to discover which upstream tests
-need explicit PaaS handling. Install, update, and other non-Platform projects are not part
-of this workflow yet.
+The deployment and ATS jobs stay in the same workflow so ATS can directly depend on the
+deployment job and the final Slack notification can summarize both phases without a
+cross-workflow handoff. Install, update, and other non-Platform projects are not part of
+this workflow yet.

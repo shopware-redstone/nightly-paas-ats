@@ -11,11 +11,6 @@ on:
         required: false
         default: false
         type: boolean
-      run_platform_suite:
-        description: "Run the full ATS Platform suite after smoke"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -34,6 +29,15 @@ jobs:
       DEPLOY_TARGET: ${{ matrix.name }}
       DEPLOY_BRANCH: ${{ matrix.branch }}
       DEPLOY_APPLICATION: ${{ matrix.application }}
+    outputs:
+      result: ${{ steps.deployment_summary.outputs.result }}
+      summary: ${{ steps.deployment_summary.outputs.summary }}
+      stage: ${{ steps.deployment_summary.outputs.stage }}
+      target: ${{ steps.deployment_summary.outputs.target }}
+      branch: ${{ steps.deployment_summary.outputs.branch }}
+      application: ${{ steps.deployment_summary.outputs.application }}
+      changed: ${{ steps.deployment_summary.outputs.changed }}
+      commit: ${{ steps.deployment_summary.outputs.commit }}
 
     strategy:
       fail-fast: false
@@ -192,20 +196,14 @@ jobs:
             sleep "$retry_delay_seconds"
           done
 
-      - name: Notify Slack deployment status
+      - name: Record deployment summary
+        id: deployment_summary
         if: always()
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           JOB_STATUS: ${{ job.status }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           COMMIT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-
-          if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
-            echo "SLACK_WEBHOOK_URL is not configured; skipping Slack notification."
-            exit 0
-          fi
 
           if [[ "${DEPLOY_DECISION:-pending}" == "skipped" && "$JOB_STATUS" == "success" ]]; then
             result="skipped"
@@ -219,113 +217,26 @@ jobs:
           fi
 
           short_sha="${COMMIT_SHA:0:8}"
-          payload="$(jq -n \
-            --arg text "Nightly PaaS deployment ${result}: ${DEPLOY_APPLICATION}" \
-            --arg result "$result" \
-            --arg summary "$summary" \
-            --arg stage "${DEPLOY_STAGE:-unknown}" \
-            --arg target "${DEPLOY_TARGET:-unknown}" \
-            --arg branch "${DEPLOY_BRANCH:-unknown}" \
-            --arg application "${DEPLOY_APPLICATION:-unknown}" \
-            --arg changed "${DEPLOY_CHANGED:-unknown}" \
-            --arg commit "$short_sha" \
-            --arg run "$RUN_URL" \
-            '{
-              text: $text,
-              blocks: [
-                {type: "section", text: {type: "mrkdwn", text: "*Nightly PaaS deployment:* \($result)\n\($summary)"}},
-                {type: "section", fields: [
-                  {type: "mrkdwn", text: "*Target:*\n\($target)"},
-                  {type: "mrkdwn", text: "*Application:*\n\($application)"},
-                  {type: "mrkdwn", text: "*Branch:*\n\($branch)"},
-                  {type: "mrkdwn", text: "*Commit:*\n`\($commit)`"},
-                  {type: "mrkdwn", text: "*Stage:*\n\($stage)"},
-                  {type: "mrkdwn", text: "*Lock changed:*\n\($changed)"}
-                ]},
-                {type: "section", text: {type: "mrkdwn", text: "*Run:* <\($run)|Open GitHub Actions>"}}
-              ]
-            }')"
+          if git rev-parse --short=8 HEAD > /tmp/deploy-commit 2>/dev/null; then
+            short_sha="$(cat /tmp/deploy-commit)"
+          fi
 
-          curl -fsS -H "Content-Type: application/json" -d "$payload" "$SLACK_WEBHOOK_URL" \
-            || echo "Slack notification failed."
-
-  ats-smoke:
-    name: ATS smoke ${{ matrix.name }}
-    needs: update-and-deploy
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: trunk
-            shopware_ref: trunk
-            # Resolves ATS_APP_URL_TRUNK and ATS_SHOPWARE_*_TRUNK.
-            ats_config_suffix: TRUNK
-            # Creates products via ATS and verifies storefront search.
-            spec: tests/Search/ProductSearch.spec.ts
-
-    env:
-      ATS_CONFIG_SUFFIX: ${{ matrix.ats_config_suffix }}
-      SHOPWARE_ACCEPTANCE_INSTANCE_TYPE: paas
-      APP_URL: ${{ vars[format('ATS_APP_URL_{0}', matrix.ats_config_suffix)] || secrets[format('ATS_APP_URL_{0}', matrix.ats_config_suffix)] }}
-      SHOPWARE_ACCESS_KEY_ID: ${{ secrets[format('ATS_SHOPWARE_ACCESS_KEY_ID_{0}', matrix.ats_config_suffix)] }}
-      SHOPWARE_SECRET_ACCESS_KEY: ${{ secrets[format('ATS_SHOPWARE_SECRET_ACCESS_KEY_{0}', matrix.ats_config_suffix)] }}
-
-    steps:
-      - name: Checkout Shopware
-        uses: actions/checkout@v4
-        with:
-          repository: shopware/shopware
-          ref: ${{ matrix.shopware_ref }}
-          path: shopware
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: shopware/tests/acceptance/package-lock.json
-
-      - name: Validate ATS configuration
-        run: |
-          : "${APP_URL:?Missing GitHub Actions variable or secret ATS_APP_URL_${ATS_CONFIG_SUFFIX}}"
-          : "${SHOPWARE_ACCESS_KEY_ID:?Missing GitHub Actions secret ATS_SHOPWARE_ACCESS_KEY_ID_${ATS_CONFIG_SUFFIX}}"
-          : "${SHOPWARE_SECRET_ACCESS_KEY:?Missing GitHub Actions secret ATS_SHOPWARE_SECRET_ACCESS_KEY_${ATS_CONFIG_SUFFIX}}"
-
-      - name: Install ATS dependencies
-        working-directory: shopware/tests/acceptance
-        run: npm ci
-
-      - name: Install Playwright browser
-        working-directory: shopware/tests/acceptance
-        run: npx playwright install --with-deps chromium
-
-      - name: Run ATS content smoke spec
-        working-directory: shopware/tests/acceptance
-        run: npx playwright test --workers=1 --project=Platform ${{ matrix.spec }}
-
-      - name: Upload Playwright artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ats-smoke-${{ matrix.name }}-${{ github.run_id }}
-          path: |
-            shopware/tests/acceptance/test-results/
-            shopware/tests/acceptance/playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7
+          {
+            echo "result=$result"
+            echo "summary=$summary"
+            echo "stage=${DEPLOY_STAGE:-unknown}"
+            echo "target=${DEPLOY_TARGET:-unknown}"
+            echo "branch=${DEPLOY_BRANCH:-unknown}"
+            echo "application=${DEPLOY_APPLICATION:-unknown}"
+            echo "changed=${DEPLOY_CHANGED:-unknown}"
+            echo "commit=$short_sha"
+          } >> "$GITHUB_OUTPUT"
 
   ats-platform:
-    name: ATS Platform suite ${{ matrix.name }}
-    needs: ats-smoke
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_platform_suite }}
+    name: ATS Platform ${{ matrix.name }} shard ${{ matrix.shard }}/${{ matrix.total_shards }}
+    needs: update-and-deploy
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    continue-on-error: true
     permissions:
       contents: read
 
@@ -337,6 +248,14 @@ jobs:
             shopware_ref: trunk
             # Resolves ATS_APP_URL_TRUNK and ATS_SHOPWARE_*_TRUNK.
             ats_config_suffix: TRUNK
+            shard: 1
+            total_shards: 2
+          - name: trunk
+            shopware_ref: trunk
+            # Resolves ATS_APP_URL_TRUNK and ATS_SHOPWARE_*_TRUNK.
+            ats_config_suffix: TRUNK
+            shard: 2
+            total_shards: 2
 
     env:
       ATS_CONFIG_SUFFIX: ${{ matrix.ats_config_suffix }}
@@ -376,15 +295,120 @@ jobs:
 
       - name: Run ATS Platform suite
         working-directory: shopware/tests/acceptance
-        run: npx playwright test --workers=1 --project=Platform
+        run: npx playwright test --workers=1 --project=Platform --shard=${{ matrix.shard }}/${{ matrix.total_shards }}
 
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ats-platform-${{ matrix.name }}-${{ github.run_id }}
+          name: ats-platform-${{ matrix.name }}-shard-${{ matrix.shard }}-of-${{ matrix.total_shards }}-${{ github.run_id }}
           path: |
             shopware/tests/acceptance/test-results/
             shopware/tests/acceptance/playwright-report/
           if-no-files-found: ignore
           retention-days: 7
+
+  notify-slack:
+    name: Notify Slack
+    needs:
+      - update-and-deploy
+      - ats-platform
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Notify Slack nightly status
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          DEPLOY_JOB_RESULT: ${{ needs.update-and-deploy.result }}
+          DEPLOY_RESULT: ${{ needs.update-and-deploy.outputs.result }}
+          DEPLOY_SUMMARY: ${{ needs.update-and-deploy.outputs.summary }}
+          DEPLOY_STAGE: ${{ needs.update-and-deploy.outputs.stage }}
+          DEPLOY_TARGET: ${{ needs.update-and-deploy.outputs.target }}
+          DEPLOY_BRANCH: ${{ needs.update-and-deploy.outputs.branch }}
+          DEPLOY_APPLICATION: ${{ needs.update-and-deploy.outputs.application }}
+          DEPLOY_CHANGED: ${{ needs.update-and-deploy.outputs.changed }}
+          DEPLOY_COMMIT: ${{ needs.update-and-deploy.outputs.commit }}
+          ATS_JOB_RESULT: ${{ needs.ats-platform.result }}
+          ATS_SHARDS: "2"
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
+            echo "SLACK_WEBHOOK_URL is not configured; skipping Slack notification."
+            exit 0
+          fi
+
+          deploy_result="${DEPLOY_RESULT:-$DEPLOY_JOB_RESULT}"
+          deploy_summary="${DEPLOY_SUMMARY:-Deployment job result: ${DEPLOY_JOB_RESULT}.}"
+          if [[ "$DEPLOY_JOB_RESULT" != "success" ]]; then
+            deploy_result="failure"
+            if [[ "${DEPLOY_RESULT:-}" == "failure" && -n "${DEPLOY_SUMMARY:-}" ]]; then
+              deploy_summary="$DEPLOY_SUMMARY"
+            else
+              deploy_summary="Deployment job failed."
+            fi
+          fi
+
+          case "$ATS_JOB_RESULT" in
+            success)
+              ats_summary="ATS Platform passed across ${ATS_SHARDS} shards."
+              ;;
+            failure)
+              ats_summary="ATS Platform failed. Check Playwright artifacts for the failing shard."
+              ;;
+            skipped)
+              ats_summary="ATS Platform was skipped."
+              ;;
+            cancelled)
+              ats_summary="ATS Platform was cancelled."
+              ;;
+            *)
+              ats_summary="ATS Platform result: ${ATS_JOB_RESULT}."
+              ;;
+          esac
+
+          if [[ "$DEPLOY_JOB_RESULT" == "success" && "$ATS_JOB_RESULT" == "success" ]]; then
+            overall="success"
+          else
+            overall="failure"
+          fi
+
+          payload="$(jq -n \
+            --arg text "Nightly PaaS ATS ${overall}: ${DEPLOY_APPLICATION:-unknown}" \
+            --arg overall "$overall" \
+            --arg deploy_result "$deploy_result" \
+            --arg deploy_summary "$deploy_summary" \
+            --arg deploy_stage "${DEPLOY_STAGE:-unknown}" \
+            --arg ats_result "$ATS_JOB_RESULT" \
+            --arg ats_summary "$ats_summary" \
+            --arg target "${DEPLOY_TARGET:-unknown}" \
+            --arg branch "${DEPLOY_BRANCH:-unknown}" \
+            --arg application "${DEPLOY_APPLICATION:-unknown}" \
+            --arg changed "${DEPLOY_CHANGED:-unknown}" \
+            --arg commit "${DEPLOY_COMMIT:-unknown}" \
+            --arg run "$RUN_URL" \
+            '{
+              text: $text,
+              blocks: [
+                {type: "section", text: {type: "mrkdwn", text: "*Nightly PaaS ATS:* \($overall)"}},
+                {type: "section", fields: [
+                  {type: "mrkdwn", text: "*Deployment:*\n\($deploy_result)"},
+                  {type: "mrkdwn", text: "*ATS Platform:*\n\($ats_result)"},
+                  {type: "mrkdwn", text: "*Target:*\n\($target)"},
+                  {type: "mrkdwn", text: "*Application:*\n\($application)"},
+                  {type: "mrkdwn", text: "*Branch:*\n\($branch)"},
+                  {type: "mrkdwn", text: "*Commit:*\n`\($commit)`"},
+                  {type: "mrkdwn", text: "*Deploy stage:*\n\($deploy_stage)"},
+                  {type: "mrkdwn", text: "*Lock changed:*\n\($changed)"}
+                ]},
+                {type: "section", text: {type: "mrkdwn", text: "*Deploy:* \($deploy_summary)\n*ATS:* \($ats_summary)"}},
+                {type: "section", text: {type: "mrkdwn", text: "*Run:* <\($run)|Open GitHub Actions>"}}
+              ]
+            }')"
+
+          curl -fsS -H "Content-Type: application/json" -d "$payload" "$SLACK_WEBHOOK_URL" \
+            || echo "Slack notification failed."

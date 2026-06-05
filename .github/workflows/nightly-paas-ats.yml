@@ -301,7 +301,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ats-platform-${{ matrix.name }}-shard-${{ matrix.shard }}-of-${{ matrix.total_shards }}-${{ github.run_id }}
+          name: ats-platform-${{ matrix.name }}-shard-${{ matrix.shard }}-of-${{ matrix.total_shards }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             shopware/tests/acceptance/test-results/
             shopware/tests/acceptance/playwright-report/

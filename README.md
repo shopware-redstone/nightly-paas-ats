@@ -28,12 +28,23 @@ Secrets:
 
 - `SW_PAAS_TOKEN`: PaaS token used by the workflow to update and deploy the application.
 - `COMPOSER_UPDATE_TOKEN`: optional PAT used for pushing lock-file updates. If it is not configured, the workflow falls back to `GITHUB_TOKEN`.
-- `SLACK_WEBHOOK_URL`: optional Slack Incoming Webhook URL used to post nightly deployment status.
+- `ATS_SHOPWARE_ACCESS_KEY_ID_TRUNK`: Shopware Admin API integration access key used by ATS for trunk.
+- `ATS_SHOPWARE_SECRET_ACCESS_KEY_TRUNK`: Shopware Admin API integration secret used by ATS for trunk.
+- `SLACK_WEBHOOK_URL`: optional Slack Incoming Webhook URL used to post nightly deployment and ATS status.
 
 Variables:
 
 - `SW_PAAS_PROJECT`: PaaS project name.
 - `SW_PAAS_ORGANIZATION`: optional; defaults to `shopware-qa` when empty.
+- `ATS_APP_URL_TRUNK`: public URL of the deployed trunk PaaS application.
+
+Each ATS matrix target resolves its configuration through `ats_config_suffix`. The current
+trunk target uses `TRUNK`, so future `paas/*` targets should add their own safe suffix and matching
+`ATS_APP_URL_<SUFFIX>`, `ATS_SHOPWARE_ACCESS_KEY_ID_<SUFFIX>`, and
+`ATS_SHOPWARE_SECRET_ACCESS_KEY_<SUFFIX>` entries.
+
+ATS runs set `SHOPWARE_ACCEPTANCE_INSTANCE_TYPE=paas` so the upstream acceptance suite can
+apply PaaS-specific behavior once it supports that signal.
 
 ## Workflow
 
@@ -46,6 +57,15 @@ For each target, the workflow:
 3. Commits and pushes `composer.lock` when it changed.
 4. Updates the matching Shopware PaaS application.
 5. Retries transient PaaS deployment failures up to three times.
-6. Posts deployment status to Slack when `SLACK_WEBHOOK_URL` is configured.
+6. Runs the full `shopware/shopware` ATS `Platform` project against the deployed URL.
+7. Splits the Platform project into two Playwright shards to reduce wall-clock runtime.
+8. Uploads Playwright `test-results` and `playwright-report` artifacts for each shard.
+9. Posts combined deployment and ATS status to Slack when `SLACK_WEBHOOK_URL` is configured.
 
-ATS execution will be added after the trunk PaaS target is stable in this repository.
+The ATS Platform suite runs:
+`npx playwright test --workers=1 --project=Platform --shard=<shard>/2`.
+
+The deployment and ATS jobs stay in the same workflow so ATS can directly depend on the
+deployment job and the final Slack notification can summarize both phases without a
+cross-workflow handoff. Install, update, and other non-Platform projects are not part of
+this workflow yet.

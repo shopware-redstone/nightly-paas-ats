@@ -337,11 +337,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
-            echo "SLACK_WEBHOOK_URL is not configured; skipping Slack notification."
-            exit 0
-          fi
-
           deploy_result="${DEPLOY_RESULT:-$DEPLOY_JOB_RESULT}"
           deploy_summary="${DEPLOY_SUMMARY:-Deployment job result: ${DEPLOY_JOB_RESULT}.}"
           if [[ "$DEPLOY_JOB_RESULT" != "success" ]]; then
@@ -377,6 +372,11 @@ jobs:
             overall="failure"
           fi
 
+          if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
+            echo "::error title=Missing Slack webhook::SLACK_WEBHOOK_URL is not configured; cannot send the nightly status notification."
+            exit 1
+          fi
+
           payload="$(jq -n \
             --arg text "Nightly PaaS ATS ${overall}: ${DEPLOY_APPLICATION:-unknown}" \
             --arg overall "$overall" \
@@ -410,5 +410,21 @@ jobs:
               ]
             }')"
 
-          curl -fsS -H "Content-Type: application/json" -d "$payload" "$SLACK_WEBHOOK_URL" \
-            || echo "Slack notification failed."
+          response_file="${RUNNER_TEMP}/slack-response.txt"
+          if ! http_status="$(curl -sS -o "$response_file" -w "%{http_code}" -H "Content-Type: application/json" -d "$payload" "$SLACK_WEBHOOK_URL")"; then
+            echo "::error title=Slack notification failed::Slack webhook request failed."
+            if [[ -s "$response_file" ]]; then
+              sed -n '1,20p' "$response_file"
+            fi
+            exit 1
+          fi
+
+          if (( http_status < 200 || http_status >= 300 )); then
+            echo "::error title=Slack notification failed::Slack webhook returned HTTP ${http_status}."
+            if [[ -s "$response_file" ]]; then
+              sed -n '1,20p' "$response_file"
+            fi
+            exit 1
+          fi
+
+          echo "Slack notification sent."

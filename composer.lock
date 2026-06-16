@@ -7076,12 +7076,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "3fcec7f6822eca11d1d528db5c934eb3fac893c5"
+                "reference": "82b52912b556a7d69bb3c97038f0631f6007d679"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/3fcec7f6822eca11d1d528db5c934eb3fac893c5",
-                "reference": "3fcec7f6822eca11d1d528db5c934eb3fac893c5",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/82b52912b556a7d69bb3c97038f0631f6007d679",
+                "reference": "82b52912b556a7d69bb3c97038f0631f6007d679",
                 "shasum": ""
             },
             "require": {
@@ -7314,7 +7314,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-06-12T13:21:14+00:00"
+            "time": "2026-06-15T20:47:39+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
@@ -13227,16 +13227,16 @@
         },
         {
             "name": "webmozart/assert",
-            "version": "2.4.0",
+            "version": "2.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webmozarts/assert.git",
-                "reference": "9007ea6f45ecf352a9422b36644e4bfc039b9155"
+                "reference": "2ccb7c2e821038c03a3e6e1700c570c158c55f70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozarts/assert/zipball/9007ea6f45ecf352a9422b36644e4bfc039b9155",
-                "reference": "9007ea6f45ecf352a9422b36644e4bfc039b9155",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/2ccb7c2e821038c03a3e6e1700c570c158c55f70",
+                "reference": "2ccb7c2e821038c03a3e6e1700c570c158c55f70",
                 "shasum": ""
             },
             "require": {
@@ -13287,9 +13287,9 @@
             ],
             "support": {
                 "issues": "https://github.com/webmozarts/assert/issues",
-                "source": "https://github.com/webmozarts/assert/tree/2.4.0"
+                "source": "https://github.com/webmozarts/assert/tree/2.4.1"
             },
-            "time": "2026-05-20T13:07:01+00:00"
+            "time": "2026-06-15T15:31:57+00:00"
         },
         {
             "name": "zircote/swagger-php",

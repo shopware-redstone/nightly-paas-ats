@@ -372,18 +372,55 @@ jobs:
             overall="failure"
           fi
 
+          status_label() {
+            case "$1" in
+              success) echo "SUCCESS" ;;
+              failure) echo "FAILURE" ;;
+              skipped) echo "SKIPPED" ;;
+              cancelled) echo "CANCELLED" ;;
+              *) tr '[:lower:]' '[:upper:]' <<<"${1:-UNKNOWN}" ;;
+            esac
+          }
+
+          status_icon() {
+            case "$1" in
+              success) echo ":large_green_circle:" ;;
+              failure) echo ":red_circle:" ;;
+              skipped) echo ":large_yellow_circle:" ;;
+              cancelled) echo ":black_circle:" ;;
+              *) echo ":white_circle:" ;;
+            esac
+          }
+
+          if [[ "$overall" == "success" ]]; then
+            status_color="#2eb67d"
+          else
+            status_color="#e01e5a"
+          fi
+
+          overall_label="$(status_label "$overall")"
+          overall_icon="$(status_icon "$overall")"
+          deploy_label="$(status_label "$deploy_result")"
+          deploy_icon="$(status_icon "$deploy_result")"
+          ats_label="$(status_label "$ATS_JOB_RESULT")"
+          ats_icon="$(status_icon "$ATS_JOB_RESULT")"
+
           if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
             echo "::error title=Missing Slack webhook::SLACK_WEBHOOK_URL is not configured; cannot send the nightly status notification."
             exit 1
           fi
 
           payload="$(jq -n \
-            --arg text "Nightly PaaS ATS ${overall}: ${DEPLOY_APPLICATION:-unknown}" \
-            --arg overall "$overall" \
-            --arg deploy_result "$deploy_result" \
+            --arg text "Nightly PaaS ATS ${overall_label}: ${DEPLOY_APPLICATION:-unknown}" \
+            --arg status_color "$status_color" \
+            --arg overall_icon "$overall_icon" \
+            --arg overall_label "$overall_label" \
+            --arg deploy_icon "$deploy_icon" \
+            --arg deploy_label "$deploy_label" \
             --arg deploy_summary "$deploy_summary" \
             --arg deploy_stage "${DEPLOY_STAGE:-unknown}" \
-            --arg ats_result "$ATS_JOB_RESULT" \
+            --arg ats_icon "$ats_icon" \
+            --arg ats_label "$ats_label" \
             --arg ats_summary "$ats_summary" \
             --arg target "${DEPLOY_TARGET:-unknown}" \
             --arg branch "${DEPLOY_BRANCH:-unknown}" \
@@ -393,20 +430,26 @@ jobs:
             --arg run "$RUN_URL" \
             '{
               text: $text,
-              blocks: [
-                {type: "section", text: {type: "mrkdwn", text: "*Nightly PaaS ATS:* \($overall)"}},
-                {type: "section", fields: [
-                  {type: "mrkdwn", text: "*Deployment:*\n\($deploy_result)"},
-                  {type: "mrkdwn", text: "*ATS Platform:*\n\($ats_result)"},
-                  {type: "mrkdwn", text: "*Target:*\n\($target)"},
-                  {type: "mrkdwn", text: "*Application:*\n\($application)"},
-                  {type: "mrkdwn", text: "*Branch:*\n\($branch)"},
-                  {type: "mrkdwn", text: "*Commit:*\n`\($commit)`"},
-                  {type: "mrkdwn", text: "*Deploy stage:*\n\($deploy_stage)"},
-                  {type: "mrkdwn", text: "*Lock changed:*\n\($changed)"}
-                ]},
-                {type: "section", text: {type: "mrkdwn", text: "*Deploy:* \($deploy_summary)\n*ATS:* \($ats_summary)"}},
-                {type: "section", text: {type: "mrkdwn", text: "*Run:* <\($run)|Open GitHub Actions>"}}
+              attachments: [
+                {
+                  color: $status_color,
+                  fallback: $text,
+                  blocks: [
+                    {type: "section", text: {type: "mrkdwn", text: "*Nightly PaaS ATS:* \($overall_icon) *\($overall_label)*"}},
+                    {type: "section", fields: [
+                      {type: "mrkdwn", text: "*Deployment:*\n\($deploy_icon) \($deploy_label)"},
+                      {type: "mrkdwn", text: "*ATS Platform:*\n\($ats_icon) \($ats_label)"},
+                      {type: "mrkdwn", text: "*Target:*\n\($target)"},
+                      {type: "mrkdwn", text: "*Application:*\n\($application)"},
+                      {type: "mrkdwn", text: "*Branch:*\n\($branch)"},
+                      {type: "mrkdwn", text: "*Commit:*\n`\($commit)`"},
+                      {type: "mrkdwn", text: "*Deploy stage:*\n\($deploy_stage)"},
+                      {type: "mrkdwn", text: "*Lock changed:*\n\($changed)"}
+                    ]},
+                    {type: "section", text: {type: "mrkdwn", text: "*Deploy:* \($deploy_summary)\n*ATS:* \($ats_summary)"}},
+                    {type: "section", text: {type: "mrkdwn", text: "*Run:* <\($run)|Open GitHub Actions>"}}
+                  ]
+                }
               ]
             }')"
 

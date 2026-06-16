@@ -378,7 +378,7 @@ jobs:
               failure) echo "FAILURE" ;;
               skipped) echo "SKIPPED" ;;
               cancelled) echo "CANCELLED" ;;
-              *) echo "${1:-UNKNOWN}" | tr '[:lower:]' '[:upper:]' ;;
+              *) tr '[:lower:]' '[:upper:]' <<<"${1:-UNKNOWN}" ;;
             esac
           }
 

@@ -3103,16 +3103,16 @@
         },
         {
             "name": "league/flysystem",
-            "version": "3.34.0",
+            "version": "3.35.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/flysystem.git",
-                "reference": "2daaac3b0d4c83ea7ed5d8586e786f5d00f3540e"
+                "reference": "d0a405f03d980461e4b6e08cfed2c162650f9f6b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/2daaac3b0d4c83ea7ed5d8586e786f5d00f3540e",
-                "reference": "2daaac3b0d4c83ea7ed5d8586e786f5d00f3540e",
+                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/d0a405f03d980461e4b6e08cfed2c162650f9f6b",
+                "reference": "d0a405f03d980461e4b6e08cfed2c162650f9f6b",
                 "shasum": ""
             },
             "require": {
@@ -3180,9 +3180,9 @@
             ],
             "support": {
                 "issues": "https://github.com/thephpleague/flysystem/issues",
-                "source": "https://github.com/thephpleague/flysystem/tree/3.34.0"
+                "source": "https://github.com/thephpleague/flysystem/tree/3.35.0"
             },
-            "time": "2026-05-14T10:28:08+00:00"
+            "time": "2026-06-22T20:12:06+00:00"
         },
         {
             "name": "league/flysystem-async-aws-s3",
@@ -7075,12 +7075,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "b349908c6e5fea58eb03cb1c370f38c274199702"
+                "reference": "0dc4e75af0956ba02c48762f399fd1dd1ce4dddf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/b349908c6e5fea58eb03cb1c370f38c274199702",
-                "reference": "b349908c6e5fea58eb03cb1c370f38c274199702",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/0dc4e75af0956ba02c48762f399fd1dd1ce4dddf",
+                "reference": "0dc4e75af0956ba02c48762f399fd1dd1ce4dddf",
                 "shasum": ""
             },
             "require": {
@@ -7313,7 +7313,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-06-19T13:27:41+00:00"
+            "time": "2026-06-22T13:52:12+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

@@ -6831,20 +6831,20 @@
         },
         {
             "name": "shopware/conflicts",
-            "version": "0.6.1",
+            "version": "0.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/conflicts.git",
-                "reference": "8ca5d196cc2fa5813c841eca0c15efcf26fa2404"
+                "reference": "679e5ab87db7584341211f691e3b55e59b02bf38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/conflicts/zipball/8ca5d196cc2fa5813c841eca0c15efcf26fa2404",
-                "reference": "8ca5d196cc2fa5813c841eca0c15efcf26fa2404",
+                "url": "https://api.github.com/repos/shopware/conflicts/zipball/679e5ab87db7584341211f691e3b55e59b02bf38",
+                "reference": "679e5ab87db7584341211f691e3b55e59b02bf38",
                 "shasum": ""
             },
             "require": {
-                "shopware/core": ">=6.7.11.0"
+                "shopware/core": ">=6.7.12.1"
             },
             "conflict": {
                 "phenx/php-font-lib": "<0.5.5",
@@ -6862,9 +6862,9 @@
             "description": "Shopware 6 conflicting packages",
             "support": {
                 "issues": "https://github.com/shopware/conflicts/issues",
-                "source": "https://github.com/shopware/conflicts/tree/0.6.1"
+                "source": "https://github.com/shopware/conflicts/tree/0.6.2"
             },
-            "time": "2026-05-26T08:44:41+00:00"
+            "time": "2026-07-07T07:15:06+00:00"
         },
         {
             "name": "shopware/deployment-helper",
@@ -7064,12 +7064,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "d35257f536432f78720f053da73a3eca86258cbb"
+                "reference": "97e8cc96c16abf7ff65940e91fd779dc99aaebfd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/d35257f536432f78720f053da73a3eca86258cbb",
-                "reference": "d35257f536432f78720f053da73a3eca86258cbb",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/97e8cc96c16abf7ff65940e91fd779dc99aaebfd",
+                "reference": "97e8cc96c16abf7ff65940e91fd779dc99aaebfd",
                 "shasum": ""
             },
             "require": {
@@ -7137,7 +7137,7 @@
                 "scssphp/scssphp": "v1.12.0",
                 "setasign/fpdi": "^2.3.7",
                 "setasign/tfpdf": "^1.33",
-                "shopware/conflicts": "0.6.1",
+                "shopware/conflicts": "0.6.2",
                 "shyim/opensearch-php-dsl": "^1.1.4",
                 "squirrelphp/twig-php-syntax": "^1.13.0",
                 "symfony/asset": "~7.4.0",
@@ -7313,7 +7313,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-07-19T13:39:27+00:00"
+            "time": "2026-07-20T21:13:21+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

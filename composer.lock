@@ -1004,16 +1004,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "4.4.3",
+            "version": "4.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "61e730f1658814821a85f2402c945f3883407dec"
+                "reference": "fb9e0ffe15e1590e24dc61c0c0a23f9a33ee42ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/61e730f1658814821a85f2402c945f3883407dec",
-                "reference": "61e730f1658814821a85f2402c945f3883407dec",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/fb9e0ffe15e1590e24dc61c0c0a23f9a33ee42ce",
+                "reference": "fb9e0ffe15e1590e24dc61c0c0a23f9a33ee42ce",
                 "shasum": ""
             },
             "require": {
@@ -1090,7 +1090,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/dbal/issues",
-                "source": "https://github.com/doctrine/dbal/tree/4.4.3"
+                "source": "https://github.com/doctrine/dbal/tree/4.4.4"
             },
             "funding": [
                 {
@@ -1106,7 +1106,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-20T08:52:12+00:00"
+            "time": "2026-07-21T14:34:40+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -3748,16 +3748,16 @@
         },
         {
             "name": "mcp/sdk",
-            "version": "v0.6.0",
+            "version": "v0.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modelcontextprotocol/php-sdk.git",
-                "reference": "433c84b58af346dd32f15f9909679e96a46ebe23"
+                "reference": "a6f415578fa789783d010274d11c922e97659a8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modelcontextprotocol/php-sdk/zipball/433c84b58af346dd32f15f9909679e96a46ebe23",
-                "reference": "433c84b58af346dd32f15f9909679e96a46ebe23",
+                "url": "https://api.github.com/repos/modelcontextprotocol/php-sdk/zipball/a6f415578fa789783d010274d11c922e97659a8a",
+                "reference": "a6f415578fa789783d010274d11c922e97659a8a",
                 "shasum": ""
             },
             "require": {
@@ -3826,9 +3826,9 @@
             "description": "Model Context Protocol SDK for Client and Server applications in PHP",
             "support": {
                 "issues": "https://github.com/modelcontextprotocol/php-sdk/issues",
-                "source": "https://github.com/modelcontextprotocol/php-sdk/tree/v0.6.0"
+                "source": "https://github.com/modelcontextprotocol/php-sdk/tree/v0.7.0"
             },
-            "time": "2026-06-02T15:47:04+00:00"
+            "time": "2026-07-14T22:58:00+00:00"
         },
         {
             "name": "meyfa/php-svg",
@@ -6054,6 +6054,68 @@
             "time": "2021-10-29T13:26:27+00:00"
         },
         {
+            "name": "radebatz/type-info-extras",
+            "version": "1.0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/DerManoMann/type-info-extras.git",
+                "reference": "95a524a74a61648b44e355cb33d38db4b17ef5ce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/DerManoMann/type-info-extras/zipball/95a524a74a61648b44e355cb33d38db4b17ef5ce",
+                "reference": "95a524a74a61648b44e355cb33d38db4b17ef5ce",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "phpstan/phpdoc-parser": "^2.0",
+                "symfony/type-info": "^7.3.8 || ^7.4.1 || ^8.0 || ^8.1-@dev"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.70",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Radebatz\\TypeInfoExtras\\": "src"
+                },
+                "exclude-from-classmap": [
+                    "/tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Martin Rademacher",
+                    "email": "mano@radebatz.org"
+                }
+            ],
+            "description": "Extras for symfony/type-info",
+            "homepage": "http://radebatz.net/mano/",
+            "keywords": [
+                "component",
+                "symfony",
+                "type-info",
+                "types"
+            ],
+            "support": {
+                "issues": "https://github.com/DerManoMann/type-info-extras/issues",
+                "source": "https://github.com/DerManoMann/type-info-extras/tree/1.0.7"
+            },
+            "time": "2026-03-06T22:40:29+00:00"
+        },
+        {
             "name": "ralouphie/getallheaders",
             "version": "3.0.3",
             "source": {
@@ -7064,12 +7126,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "97e8cc96c16abf7ff65940e91fd779dc99aaebfd"
+                "reference": "ebb17998a30a01b3dfc6240148586839b51f5dc8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/97e8cc96c16abf7ff65940e91fd779dc99aaebfd",
-                "reference": "97e8cc96c16abf7ff65940e91fd779dc99aaebfd",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/ebb17998a30a01b3dfc6240148586839b51f5dc8",
+                "reference": "ebb17998a30a01b3dfc6240148586839b51f5dc8",
                 "shasum": ""
             },
             "require": {
@@ -7114,7 +7176,7 @@
                 "league/flysystem-memory": "^3.10.3",
                 "league/mime-type-detection": "^1.13.0",
                 "league/oauth2-server": "^9.3",
-                "mcp/sdk": "^0.6.0",
+                "mcp/sdk": "^0.7.0",
                 "meyfa/php-svg": "^0.16.1",
                 "monolog/monolog": "^3.3.1",
                 "nikic/php-parser": "^5.8.0",
@@ -7164,7 +7226,7 @@
                 "symfony/intl": "~7.4.0",
                 "symfony/lock": "~7.4.0",
                 "symfony/mailer": "~7.4.12",
-                "symfony/mcp-bundle": "~0.10.0",
+                "symfony/mcp-bundle": "~0.11.0",
                 "symfony/messenger": "~7.4.12",
                 "symfony/mime": "~7.4.12",
                 "symfony/monolog-bridge": "~7.4.12",
@@ -7201,7 +7263,7 @@
                 "twig/intl-extra": "^3.26.0",
                 "twig/string-extra": "^3.24.0",
                 "twig/twig": "^3.26.0",
-                "zircote/swagger-php": "^4.9.2"
+                "zircote/swagger-php": "^6.4"
             },
             "replace": {
                 "paragonie/random_compat": ">=2",
@@ -7313,20 +7375,20 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-07-20T21:13:21+00:00"
+            "time": "2026-07-21T20:38:12+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
-            "version": "1.1.5",
+            "version": "1.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shyim/opensearch-php-dsl.git",
-                "reference": "99d95883071a353a387ca59463a6e86c5a30440d"
+                "reference": "e2ad9c217df4326ca11845cbbbf540f62acedcc1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shyim/opensearch-php-dsl/zipball/99d95883071a353a387ca59463a6e86c5a30440d",
-                "reference": "99d95883071a353a387ca59463a6e86c5a30440d",
+                "url": "https://api.github.com/repos/shyim/opensearch-php-dsl/zipball/e2ad9c217df4326ca11845cbbbf540f62acedcc1",
+                "reference": "e2ad9c217df4326ca11845cbbbf540f62acedcc1",
                 "shasum": ""
             },
             "require": {
@@ -7366,9 +7428,9 @@
             "homepage": "https://github.com/shyim/opensearch-dsl",
             "support": {
                 "issues": "https://github.com/shyim/opensearch-php-dsl/issues",
-                "source": "https://github.com/shyim/opensearch-php-dsl/tree/1.1.5"
+                "source": "https://github.com/shyim/opensearch-php-dsl/tree/1.1.6"
             },
-            "time": "2026-04-09T12:34:25+00:00"
+            "time": "2026-07-21T09:03:02+00:00"
         },
         {
             "name": "smalot/pdfparser",
@@ -9620,20 +9682,20 @@
         },
         {
             "name": "symfony/mcp-bundle",
-            "version": "v0.10.0",
+            "version": "v0.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mcp-bundle.git",
-                "reference": "b473eaee250c1e59d33487e6f3a41c35a1f02afb"
+                "reference": "f973cf4f146674d362da3258ba35629ad447ecb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mcp-bundle/zipball/b473eaee250c1e59d33487e6f3a41c35a1f02afb",
-                "reference": "b473eaee250c1e59d33487e6f3a41c35a1f02afb",
+                "url": "https://api.github.com/repos/symfony/mcp-bundle/zipball/f973cf4f146674d362da3258ba35629ad447ecb1",
+                "reference": "f973cf4f146674d362da3258ba35629ad447ecb1",
                 "shasum": ""
             },
             "require": {
-                "mcp/sdk": "^0.6",
+                "mcp/sdk": "^0.6|^0.7",
                 "php-http/discovery": "^1.20",
                 "symfony/config": "^7.3|^8.0",
                 "symfony/console": "^7.3|^8.0",
@@ -9647,11 +9709,13 @@
                 "symfony/service-contracts": "^2.5|^3"
             },
             "require-dev": {
+                "nyholm/psr7": "^1.8",
                 "phpstan/phpstan": "^2.1",
                 "phpstan/phpstan-phpunit": "^2.0",
                 "phpstan/phpstan-strict-rules": "^2.0",
                 "phpunit/phpunit": "^11.5.53",
-                "symfony/monolog-bundle": "^3.10 || ^4.0"
+                "symfony/monolog-bundle": "^3.10 || ^4.0",
+                "symfony/twig-bundle": "^7.3|^8.0"
             },
             "type": "symfony-bundle",
             "extra": {
@@ -9681,7 +9745,7 @@
             ],
             "description": "Symfony integration bundle for Model Context Protocol (via official mcp/sdk)",
             "support": {
-                "source": "https://github.com/symfony/mcp-bundle/tree/v0.10.0"
+                "source": "https://github.com/symfony/mcp-bundle/tree/v0.11.0"
             },
             "funding": [
                 {
@@ -9701,7 +9765,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-15T19:39:32+00:00"
+            "time": "2026-07-15T00:43:00+00:00"
         },
         {
             "name": "symfony/messenger",
@@ -13296,36 +13360,38 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "4.11.1",
+            "version": "6.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "7df10e8ec47db07c031db317a25bef962b4e5de1"
+                "reference": "d2006242dae81ae8833ad9a0ffb74e3254654cff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/7df10e8ec47db07c031db317a25bef962b4e5de1",
-                "reference": "7df10e8ec47db07c031db317a25bef962b4e5de1",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/d2006242dae81ae8833ad9a0ffb74e3254654cff",
+                "reference": "d2006242dae81ae8833ad9a0ffb74e3254654cff",
                 "shasum": ""
             },
             "require": {
-                "ext-json": "*",
-                "php": ">=7.2",
+                "nikic/php-parser": "^4.19 || ^5.0",
+                "php": ">=8.2",
+                "phpstan/phpdoc-parser": "^2.0",
                 "psr/log": "^1.1 || ^2.0 || ^3.0",
+                "radebatz/type-info-extras": "^1.0.2",
+                "symfony/console": "^7.4 || ^8.0",
                 "symfony/deprecation-contracts": "^2 || ^3",
-                "symfony/finder": ">=2.2",
-                "symfony/yaml": ">=3.3"
+                "symfony/finder": "^5.0 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/yaml": "^5.4 || ^6.0 || ^7.0 || ^8.0"
+            },
+            "conflict": {
+                "symfony/process": ">=6, <6.4.14"
             },
             "require-dev": {
-                "composer/package-versions-deprecated": "^1.11",
-                "doctrine/annotations": "^1.7 || ^2.0",
-                "friendsofphp/php-cs-fixer": "^2.17 || 3.62.0",
-                "phpstan/phpstan": "^1.6",
-                "phpunit/phpunit": ">=8",
-                "vimeo/psalm": "^4.23"
-            },
-            "suggest": {
-                "doctrine/annotations": "^1.7 || ^2.0"
+                "doctrine/annotations": "^2.0",
+                "friendsofphp/php-cs-fixer": "^3.62.0",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^11.5 || >=12.5.22",
+                "rector/rector": "^2.3.1"
             },
             "bin": [
                 "bin/openapi"
@@ -13333,7 +13399,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.x-dev"
+                    "dev-master": "6.x-dev"
                 }
             },
             "autoload": {
@@ -13361,8 +13427,8 @@
                     "homepage": "https://radebatz.net"
                 }
             ],
-            "description": "swagger-php - Generate interactive documentation for your RESTful API using phpdoc annotations",
-            "homepage": "https://github.com/zircote/swagger-php/",
+            "description": "Generate interactive documentation for your RESTful API using PHP attributes (preferred) or PHPDoc annotations",
+            "homepage": "https://github.com/zircote/swagger-php",
             "keywords": [
                 "api",
                 "json",
@@ -13371,9 +13437,15 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/4.11.1"
+                "source": "https://github.com/zircote/swagger-php/tree/6.4.0"
             },
-            "time": "2024-10-15T19:20:02+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/zircote",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-12T03:44:54+00:00"
         }
     ],
     "packages-dev": [],

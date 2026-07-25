@@ -7176,12 +7176,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "869e9ac7eabb36ebf0c1223306266bdb21fdecce"
+                "reference": "df1f3deec6e8c1f052a05928520c6605ffd8ed01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/869e9ac7eabb36ebf0c1223306266bdb21fdecce",
-                "reference": "869e9ac7eabb36ebf0c1223306266bdb21fdecce",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/df1f3deec6e8c1f052a05928520c6605ffd8ed01",
+                "reference": "df1f3deec6e8c1f052a05928520c6605ffd8ed01",
                 "shasum": ""
             },
             "require": {
@@ -7193,7 +7193,7 @@
                 "composer/semver": "^3.4.0",
                 "doctrine/dbal": "~4.4.0",
                 "doctrine/inflector": "^2.0",
-                "dompdf/dompdf": "3.1.6",
+                "dompdf/dompdf": "~3.1.6",
                 "dragonmantank/cron-expression": "^3.3",
                 "ext-ctype": "*",
                 "ext-curl": "*",
@@ -7413,7 +7413,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-07-23T18:26:21+00:00"
+            "time": "2026-07-24T19:34:06+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

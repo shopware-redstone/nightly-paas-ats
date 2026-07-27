@@ -130,8 +130,8 @@ jobs:
         shell: bash
         env:
           SW_PAAS_DIR: ${{ runner.temp }}/sw-paas
-          SW_PAAS_CLI_VERSION: "0.0.55"
-          SW_PAAS_CLI_SHA256: b6e4e0fa2044a460a34402bbe3e4b4b3b955aa3c21598715a342d3f89457f769
+          SW_PAAS_CLI_VERSION: "0.0.60"
+          SW_PAAS_CLI_SHA256: 8da4c2e75f024f4f952d8d65d4dcc52259e81889283ecb4e60135644a562525a
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"

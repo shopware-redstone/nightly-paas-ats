@@ -172,7 +172,7 @@ jobs:
           for attempt in $(seq 1 "$max_attempts"); do
             echo "::group::PaaS deploy attempt ${attempt}/${max_attempts}"
 
-            if sw-paas application update \
+            if sw-paas --show-ids application update \
               --token "$SW_PAAS_TOKEN" \
               --organization "$SW_PAAS_ORGANIZATION" \
               --project "$SW_PAAS_PROJECT" \

@@ -153,6 +153,29 @@ jobs:
           echo "$SW_PAAS_DIR/bin" >> "$GITHUB_PATH"
           "$SW_PAAS_DIR/bin/sw-paas" --version
 
+      - name: Validate Shopware PaaS target access
+        if: steps.changes.outputs.changed == 'true' || inputs.force == true
+        env:
+          SW_PAAS_TOKEN: ${{ secrets.SW_PAAS_TOKEN }}
+          SW_PAAS_ORGANIZATION: ${{ vars.SW_PAAS_ORGANIZATION }}
+          SW_PAAS_PROJECT: ${{ vars.SW_PAAS_PROJECT }}
+          SW_PAAS_APPLICATION: ${{ matrix.application }}
+        run: |
+          set -euo pipefail
+          echo "DEPLOY_STAGE=Validate Shopware PaaS target access" >> "$GITHUB_ENV"
+          SW_PAAS_ORGANIZATION="${SW_PAAS_ORGANIZATION:-shopware-qa}"
+
+          : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
+          : "${SW_PAAS_ORGANIZATION:?Missing PaaS organization}"
+          : "${SW_PAAS_PROJECT:?Missing GitHub Actions variable SW_PAAS_PROJECT}"
+          : "${SW_PAAS_APPLICATION:?Missing PaaS application}"
+
+          sw-paas --show-ids --skip-project-discovery application get \
+            --token "$SW_PAAS_TOKEN" \
+            --organization "$SW_PAAS_ORGANIZATION" \
+            --project "$SW_PAAS_PROJECT" \
+            --application "$SW_PAAS_APPLICATION"
+
       - name: Deploy updated application
         if: steps.changes.outputs.changed == 'true' || inputs.force == true
         env:
@@ -176,6 +199,7 @@ jobs:
 
           for attempt in $(seq 1 "$max_attempts"); do
             echo "::group::PaaS deploy attempt ${attempt}/${max_attempts}"
+            echo "Updating ${SW_PAAS_ORGANIZATION}/${SW_PAAS_PROJECT}/${SW_PAAS_APPLICATION} to ${commit_sha}."
 
             if sw-paas --show-ids --skip-project-discovery application update \
               --token "$SW_PAAS_TOKEN" \
@@ -190,6 +214,7 @@ jobs:
               exit_code=$?
             fi
 
+            echo "::warning title=PaaS deployment attempt failed::sw-paas application update exited with code ${exit_code} for ${SW_PAAS_APPLICATION} at ${commit_sha}."
             echo "::endgroup::"
 
             if [[ "$attempt" -eq "$max_attempts" ]]; then

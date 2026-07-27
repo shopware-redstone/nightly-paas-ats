@@ -11,6 +11,11 @@ on:
         required: false
         default: false
         type: boolean
+      notify_slack:
+        description: "Post the final nightly status to Slack"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -313,7 +318,7 @@ jobs:
     needs:
       - update-and-deploy
       - ats-platform
-    if: always()
+    if: always() && (github.event_name != 'workflow_dispatch' || inputs.notify_slack)
     runs-on: ubuntu-latest
     permissions:
       contents: read

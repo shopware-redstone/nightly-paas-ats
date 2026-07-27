@@ -163,13 +163,11 @@ jobs:
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Validate Shopware PaaS target access" >> "$GITHUB_ENV"
-          SW_PAAS_ORGANIZATION_ID="${SW_PAAS_ORGANIZATION_ID:-8bfd1129-83c7-4e43-a63d-75baf651e7b3}"
-          SW_PAAS_PROJECT_ID="${SW_PAAS_PROJECT_ID:-19e52c0d-fc7b-4e4f-85c7-b3d571174312}"
           SW_PAAS_STATE_HOME="${RUNNER_TEMP}/sw-paas-context.yaml"
 
           : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
-          : "${SW_PAAS_ORGANIZATION_ID:?Missing PaaS organization ID}"
-          : "${SW_PAAS_PROJECT_ID:?Missing PaaS project ID}"
+          : "${SW_PAAS_ORGANIZATION_ID:?Missing GitHub Actions variable SW_PAAS_ORGANIZATION_ID}"
+          : "${SW_PAAS_PROJECT_ID:?Missing GitHub Actions variable SW_PAAS_PROJECT_ID}"
           : "${SW_PAAS_APPLICATION:?Missing PaaS application}"
 
           printf 'organizationId: %s\nprojectId: %s\n' "$SW_PAAS_ORGANIZATION_ID" "$SW_PAAS_PROJECT_ID" > "$SW_PAAS_STATE_HOME"
@@ -188,13 +186,11 @@ jobs:
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Shopware PaaS application update" >> "$GITHUB_ENV"
-          SW_PAAS_ORGANIZATION_ID="${SW_PAAS_ORGANIZATION_ID:-8bfd1129-83c7-4e43-a63d-75baf651e7b3}"
-          SW_PAAS_PROJECT_ID="${SW_PAAS_PROJECT_ID:-19e52c0d-fc7b-4e4f-85c7-b3d571174312}"
           SW_PAAS_STATE_HOME="${RUNNER_TEMP}/sw-paas-context.yaml"
 
           : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
-          : "${SW_PAAS_ORGANIZATION_ID:?Missing PaaS organization ID}"
-          : "${SW_PAAS_PROJECT_ID:?Missing PaaS project ID}"
+          : "${SW_PAAS_ORGANIZATION_ID:?Missing GitHub Actions variable SW_PAAS_ORGANIZATION_ID}"
+          : "${SW_PAAS_PROJECT_ID:?Missing GitHub Actions variable SW_PAAS_PROJECT_ID}"
           : "${SW_PAAS_APPLICATION:?Missing PaaS application}"
 
           printf 'organizationId: %s\nprojectId: %s\n' "$SW_PAAS_ORGANIZATION_ID" "$SW_PAAS_PROJECT_ID" > "$SW_PAAS_STATE_HOME"

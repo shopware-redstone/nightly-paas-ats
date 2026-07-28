@@ -1,0 +1,156 @@
+name: Shopware PaaS CLI Update Check
+
+on:
+  schedule:
+    # Check weekly for a newer sw-paas CLI without adding daily notification noise.
+    - cron: "25 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sw-paas-cli-update-check
+  cancel-in-progress: false
+
+jobs:
+  check-sw-paas-cli:
+    name: Check sw-paas CLI release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          # Use a PAT so the generated PR can trigger downstream workflows.
+          # Fall back to the default GITHUB_TOKEN if no PAT is configured.
+          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Check latest sw-paas release
+        id: sw_paas
+        env:
+          GH_TOKEN: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          workflow_file=".github/workflows/nightly-paas-ats.yml"
+          release_json="${RUNNER_TEMP}/sw-paas-release.json"
+          archive="${RUNNER_TEMP}/sw-paas_Linux_x86_64.tar.gz"
+
+          current_version="$(ruby -ne 'if /SW_PAAS_CLI_VERSION:\s*"([^"]+)"/; puts $1; exit; end' "$workflow_file")"
+          : "${current_version:?Could not find SW_PAAS_CLI_VERSION in ${workflow_file}}"
+
+          curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/shopware/sw-paas/releases/latest" \
+            -o "$release_json"
+
+          latest_tag="$(ruby -rjson -e 'puts JSON.parse(File.read(ARGV[0])).fetch("tag_name")' "$release_json")"
+          latest_version="${latest_tag#v}"
+          is_newer="$(ruby -e 'require "rubygems"; puts Gem::Version.new(ARGV[0]) > Gem::Version.new(ARGV[1]) ? "true" : "false"' "$latest_version" "$current_version")"
+
+          {
+            echo "current_version=$current_version"
+            echo "latest_version=$latest_version"
+            echo "latest_tag=$latest_tag"
+          } >> "$GITHUB_OUTPUT"
+
+          if [[ "$is_newer" != "true" ]]; then
+            echo "update_needed=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### sw-paas CLI version check"
+              echo
+              echo "Pinned version is current: \`${current_version}\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          asset_url="$(ruby -rjson -e '
+            release = JSON.parse(File.read(ARGV[0]))
+            asset = release.fetch("assets").find { |entry| entry.fetch("name") == "sw-paas_Linux_x86_64.tar.gz" }
+            abort "Release #{release.fetch("tag_name")} does not include sw-paas_Linux_x86_64.tar.gz" unless asset
+            puts asset.fetch("browser_download_url")
+          ' "$release_json")"
+
+          curl -fsSL "$asset_url" -o "$archive"
+          latest_sha256="$(sha256sum "$archive" | cut -d " " -f 1)"
+
+          LATEST_VERSION="$latest_version" LATEST_SHA256="$latest_sha256" ruby <<'RUBY'
+            path = ".github/workflows/nightly-paas-ats.yml"
+            content = File.read(path)
+
+            content.sub!(/SW_PAAS_CLI_VERSION: "[^"]+"/, %{SW_PAAS_CLI_VERSION: "#{ENV.fetch("LATEST_VERSION")}"}) ||
+              abort("Could not update SW_PAAS_CLI_VERSION")
+            content.sub!(/SW_PAAS_CLI_SHA256: [a-f0-9]+/, "SW_PAAS_CLI_SHA256: #{ENV.fetch("LATEST_SHA256")}") ||
+              abort("Could not update SW_PAAS_CLI_SHA256")
+
+            File.write(path, content)
+          RUBY
+
+          {
+            echo "update_needed=true"
+            echo "latest_sha256=$latest_sha256"
+            echo "asset_url=$asset_url"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### sw-paas CLI update available"
+            echo
+            echo "- Current: \`${current_version}\`"
+            echo "- Latest: \`${latest_version}\`"
+            echo "- Linux x86_64 SHA256: \`${latest_sha256}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open update pull request
+        if: steps.sw_paas.outputs.update_needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+          LATEST_VERSION: ${{ steps.sw_paas.outputs.latest_version }}
+          LATEST_SHA256: ${{ steps.sw_paas.outputs.latest_sha256 }}
+          ASSET_URL: ${{ steps.sw_paas.outputs.asset_url }}
+        run: |
+          set -euo pipefail
+
+          branch="codex/update-sw-paas-cli-${LATEST_VERSION}"
+          title="Update sw-paas CLI to ${LATEST_VERSION}"
+          body_file="${RUNNER_TEMP}/sw-paas-cli-update-pr.md"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git diff --check
+          git add .github/workflows/nightly-paas-ats.yml
+          git commit -m "Update sw-paas CLI to ${LATEST_VERSION}"
+          git push --force-with-lease origin "$branch"
+
+          cat > "$body_file" <<BODY
+          ## Summary
+
+          - Bump the pinned \`sw-paas\` CLI to \`${LATEST_VERSION}\`.
+          - Update the Linux x86_64 archive checksum to \`${LATEST_SHA256}\`.
+
+          ## Source
+
+          Release asset: ${ASSET_URL}
+
+          ## Validation
+
+          - Downloaded \`sw-paas_Linux_x86_64.tar.gz\` from the latest GitHub release.
+          - Computed the SHA256 checksum from the downloaded archive.
+          BODY
+
+          if gh pr view "$branch" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh pr edit "$branch" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$title" \
+              --body-file "$body_file"
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$branch" \
+              --title "$title" \
+              --body-file "$body_file"
+          fi

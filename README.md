@@ -36,8 +36,8 @@ Shopware PaaS Native authentication moved to Shopware Account in July 2026. Pers
 
 Variables:
 
-- `SW_PAAS_PROJECT`: PaaS project name.
-- `SW_PAAS_ORGANIZATION`: optional; defaults to `shopware-qa` when empty.
+- `SW_PAAS_ORGANIZATION_ID`: PaaS organization ID used to create the CLI context file for service-account tokens.
+- `SW_PAAS_PROJECT_ID`: PaaS project ID used to create the CLI context file for service-account tokens.
 - `ATS_APP_URL_TRUNK`: public URL of the deployed trunk PaaS application.
 
 Each ATS matrix target resolves its configuration through `ats_config_suffix`. The current
@@ -71,3 +71,11 @@ The deployment and ATS jobs stay in the same workflow so ATS can directly depend
 deployment job and the final Slack notification can summarize both phases without a
 cross-workflow handoff. Install, update, and other non-Platform projects are not part of
 this workflow yet.
+
+## Maintenance
+
+The `Shopware PaaS CLI Update Check` workflow runs weekly and can also be triggered manually.
+It checks the latest `shopware/sw-paas` GitHub release against the pinned
+`SW_PAAS_CLI_VERSION` in `.github/workflows/nightly-paas-ats.yml`. When a newer release is
+available, it updates the pinned version and Linux x86_64 checksum, then opens or updates a
+pull request for review.

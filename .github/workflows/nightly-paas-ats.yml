@@ -11,6 +11,11 @@ on:
         required: false
         default: false
         type: boolean
+      notify_slack:
+        description: "Post the final nightly status to Slack"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -130,8 +135,8 @@ jobs:
         shell: bash
         env:
           SW_PAAS_DIR: ${{ runner.temp }}/sw-paas
-          SW_PAAS_CLI_VERSION: "0.0.55"
-          SW_PAAS_CLI_SHA256: b6e4e0fa2044a460a34402bbe3e4b4b3b955aa3c21598715a342d3f89457f769
+          SW_PAAS_CLI_VERSION: "0.0.60"
+          SW_PAAS_CLI_SHA256: 8da4c2e75f024f4f952d8d65d4dcc52259e81889283ecb4e60135644a562525a
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"
@@ -148,22 +153,47 @@ jobs:
           echo "$SW_PAAS_DIR/bin" >> "$GITHUB_PATH"
           "$SW_PAAS_DIR/bin/sw-paas" --version
 
+      - name: Validate Shopware PaaS target access
+        if: steps.changes.outputs.changed == 'true' || inputs.force == true
+        env:
+          SW_PAAS_TOKEN: ${{ secrets.SW_PAAS_TOKEN }}
+          SW_PAAS_ORGANIZATION_ID: ${{ vars.SW_PAAS_ORGANIZATION_ID }}
+          SW_PAAS_PROJECT_ID: ${{ vars.SW_PAAS_PROJECT_ID }}
+          SW_PAAS_APPLICATION: ${{ matrix.application }}
+        run: |
+          set -euo pipefail
+          echo "DEPLOY_STAGE=Validate Shopware PaaS target access" >> "$GITHUB_ENV"
+          SW_PAAS_STATE_HOME="${RUNNER_TEMP}/sw-paas-context.yaml"
+
+          : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
+          : "${SW_PAAS_ORGANIZATION_ID:?Missing GitHub Actions variable SW_PAAS_ORGANIZATION_ID}"
+          : "${SW_PAAS_PROJECT_ID:?Missing GitHub Actions variable SW_PAAS_PROJECT_ID}"
+          : "${SW_PAAS_APPLICATION:?Missing PaaS application}"
+
+          printf 'organizationId: %s\nprojectId: %s\n' "$SW_PAAS_ORGANIZATION_ID" "$SW_PAAS_PROJECT_ID" > "$SW_PAAS_STATE_HOME"
+
+          sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery application get \
+            --token "$SW_PAAS_TOKEN" \
+            --application "$SW_PAAS_APPLICATION"
+
       - name: Deploy updated application
         if: steps.changes.outputs.changed == 'true' || inputs.force == true
         env:
           SW_PAAS_TOKEN: ${{ secrets.SW_PAAS_TOKEN }}
-          SW_PAAS_ORGANIZATION: ${{ vars.SW_PAAS_ORGANIZATION }}
-          SW_PAAS_PROJECT: ${{ vars.SW_PAAS_PROJECT }}
+          SW_PAAS_ORGANIZATION_ID: ${{ vars.SW_PAAS_ORGANIZATION_ID }}
+          SW_PAAS_PROJECT_ID: ${{ vars.SW_PAAS_PROJECT_ID }}
           SW_PAAS_APPLICATION: ${{ matrix.application }}
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Shopware PaaS application update" >> "$GITHUB_ENV"
-          SW_PAAS_ORGANIZATION="${SW_PAAS_ORGANIZATION:-shopware-qa}"
+          SW_PAAS_STATE_HOME="${RUNNER_TEMP}/sw-paas-context.yaml"
 
           : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
-          : "${SW_PAAS_ORGANIZATION:?Missing PaaS organization}"
-          : "${SW_PAAS_PROJECT:?Missing GitHub Actions variable SW_PAAS_PROJECT}"
+          : "${SW_PAAS_ORGANIZATION_ID:?Missing GitHub Actions variable SW_PAAS_ORGANIZATION_ID}"
+          : "${SW_PAAS_PROJECT_ID:?Missing GitHub Actions variable SW_PAAS_PROJECT_ID}"
           : "${SW_PAAS_APPLICATION:?Missing PaaS application}"
+
+          printf 'organizationId: %s\nprojectId: %s\n' "$SW_PAAS_ORGANIZATION_ID" "$SW_PAAS_PROJECT_ID" > "$SW_PAAS_STATE_HOME"
 
           commit_sha="$(git rev-parse HEAD)"
           max_attempts=3
@@ -171,11 +201,10 @@ jobs:
 
           for attempt in $(seq 1 "$max_attempts"); do
             echo "::group::PaaS deploy attempt ${attempt}/${max_attempts}"
+            echo "Updating application ${SW_PAAS_APPLICATION} in project ${SW_PAAS_PROJECT_ID} to ${commit_sha}."
 
-            if sw-paas application update \
+            if sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery application update \
               --token "$SW_PAAS_TOKEN" \
-              --organization "$SW_PAAS_ORGANIZATION" \
-              --project "$SW_PAAS_PROJECT" \
               --application "$SW_PAAS_APPLICATION" \
               --commit-sha "$commit_sha"; then
               echo "DEPLOY_STAGE=Deployment completed" >> "$GITHUB_ENV"
@@ -185,6 +214,7 @@ jobs:
               exit_code=$?
             fi
 
+            echo "::warning title=PaaS deployment attempt failed::sw-paas application update exited with code ${exit_code} for ${SW_PAAS_APPLICATION} at ${commit_sha}."
             echo "::endgroup::"
 
             if [[ "$attempt" -eq "$max_attempts" ]]; then
@@ -313,7 +343,7 @@ jobs:
     needs:
       - update-and-deploy
       - ats-platform
-    if: always()
+    if: always() && (github.event_name != 'workflow_dispatch' || inputs.notify_slack)
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -26,11 +26,13 @@ PaaS application branches are separate because Shopware PaaS builds from the rep
 
 Secrets:
 
-- `SW_PAAS_TOKEN`: PaaS token used by the workflow to update and deploy the application.
+- `SW_PAAS_TOKEN`: Shopware PaaS token used by the workflow to update and deploy the application. Use a service-account token for CI/CD automation.
 - `COMPOSER_UPDATE_TOKEN`: optional PAT used for pushing lock-file updates. If it is not configured, the workflow falls back to `GITHUB_TOKEN`.
 - `ATS_SHOPWARE_ACCESS_KEY_ID_TRUNK`: Shopware Admin API integration access key used by ATS for trunk.
 - `ATS_SHOPWARE_SECRET_ACCESS_KEY_TRUNK`: Shopware Admin API integration secret used by ATS for trunk.
 - `SLACK_WEBHOOK_URL`: Slack Incoming Webhook URL used to post nightly deployment and ATS status.
+
+Shopware PaaS Native authentication moved to Shopware Account in July 2026. Personal access tokens tied to migrated user accounts can become invalid; keep this workflow on a current `sw-paas` CLI release and prefer a long-lived service-account token for `SW_PAAS_TOKEN`.
 
 Variables:
 

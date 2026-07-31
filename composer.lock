@@ -7176,12 +7176,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "b60c487594fdb871a8fc2d1c9d4b16cdcffa23a8"
+                "reference": "8ae7f14358817cb2e6659a9c5f837b82988f3250"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/b60c487594fdb871a8fc2d1c9d4b16cdcffa23a8",
-                "reference": "b60c487594fdb871a8fc2d1c9d4b16cdcffa23a8",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/8ae7f14358817cb2e6659a9c5f837b82988f3250",
+                "reference": "8ae7f14358817cb2e6659a9c5f837b82988f3250",
                 "shasum": ""
             },
             "require": {
@@ -7414,7 +7414,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-07-29T16:31:17+00:00"
+            "time": "2026-07-30T19:25:28+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
@@ -14145,16 +14145,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "6.5.0",
+            "version": "6.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "4d1794f7fbb362e0f4bfeb5315b025ef4c4949b6"
+                "reference": "791f8b2e88b78bd71c57d4de923e6d1cadfdae03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/4d1794f7fbb362e0f4bfeb5315b025ef4c4949b6",
-                "reference": "4d1794f7fbb362e0f4bfeb5315b025ef4c4949b6",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/791f8b2e88b78bd71c57d4de923e6d1cadfdae03",
+                "reference": "791f8b2e88b78bd71c57d4de923e6d1cadfdae03",
                 "shasum": ""
             },
             "require": {
@@ -14222,7 +14222,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/6.5.0"
+                "source": "https://github.com/zircote/swagger-php/tree/6.5.1"
             },
             "funding": [
                 {
@@ -14230,7 +14230,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-07-27T04:27:14+00:00"
+            "time": "2026-07-30T04:11:06+00:00"
         }
     ],
     "packages-dev": [],

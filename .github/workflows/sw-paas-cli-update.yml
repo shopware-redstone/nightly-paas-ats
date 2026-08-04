@@ -38,7 +38,7 @@ jobs:
           release_json="${RUNNER_TEMP}/sw-paas-release.json"
           archive="${RUNNER_TEMP}/sw-paas_Linux_x86_64.tar.gz"
 
-          current_version="$(ruby -ne 'if /^SW_PAAS_CLI_VERSION=(.+)$/; puts $1; exit; end' "$sw_paas_config")"
+          current_version="$(ruby -ne 'if /^SW_PAAS_CLI_VERSION=(.+)$/; puts $1.strip; exit; end' "$sw_paas_config")"
           : "${current_version:?Could not find SW_PAAS_CLI_VERSION in ${sw_paas_config}}"
 
           curl -fsSL \

@@ -135,11 +135,12 @@ jobs:
         shell: bash
         env:
           SW_PAAS_DIR: ${{ runner.temp }}/sw-paas
-          SW_PAAS_CLI_VERSION: "0.0.60"
-          SW_PAAS_CLI_SHA256: 8da4c2e75f024f4f952d8d65d4dcc52259e81889283ecb4e60135644a562525a
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"
+          source .github/sw-paas-cli.env
+          : "${SW_PAAS_CLI_VERSION:?Missing SW_PAAS_CLI_VERSION in .github/sw-paas-cli.env}"
+          : "${SW_PAAS_CLI_SHA256:?Missing SW_PAAS_CLI_SHA256 in .github/sw-paas-cli.env}"
 
           archive="${RUNNER_TEMP}/sw-paas_Linux_x86_64.tar.gz"
           download_url="https://github.com/shopware/sw-paas/releases/download/${SW_PAAS_CLI_VERSION}/sw-paas_Linux_x86_64.tar.gz"

@@ -34,12 +34,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          workflow_file=".github/workflows/nightly-paas-ats.yml"
+          sw_paas_config=".github/sw-paas-cli.env"
           release_json="${RUNNER_TEMP}/sw-paas-release.json"
           archive="${RUNNER_TEMP}/sw-paas_Linux_x86_64.tar.gz"
 
-          current_version="$(ruby -ne 'if /SW_PAAS_CLI_VERSION:\s*"([^"]+)"/; puts $1; exit; end' "$workflow_file")"
-          : "${current_version:?Could not find SW_PAAS_CLI_VERSION in ${workflow_file}}"
+          current_version="$(ruby -ne 'if /^SW_PAAS_CLI_VERSION=(.+)$/; puts $1; exit; end' "$sw_paas_config")"
+          : "${current_version:?Could not find SW_PAAS_CLI_VERSION in ${sw_paas_config}}"
 
           curl -fsSL \
             -H "Accept: application/vnd.github+json" \
@@ -78,12 +78,12 @@ jobs:
           latest_sha256="$(sha256sum "$archive" | cut -d " " -f 1)"
 
           LATEST_VERSION="$latest_version" LATEST_SHA256="$latest_sha256" ruby <<'RUBY'
-            path = ".github/workflows/nightly-paas-ats.yml"
+            path = ".github/sw-paas-cli.env"
             content = File.read(path)
 
-            content.sub!(/SW_PAAS_CLI_VERSION: "[^"]+"/, %{SW_PAAS_CLI_VERSION: "#{ENV.fetch("LATEST_VERSION")}"}) ||
+            content.sub!(/^SW_PAAS_CLI_VERSION=.+$/, "SW_PAAS_CLI_VERSION=#{ENV.fetch("LATEST_VERSION")}") ||
               abort("Could not update SW_PAAS_CLI_VERSION")
-            content.sub!(/SW_PAAS_CLI_SHA256: [a-f0-9]+/, "SW_PAAS_CLI_SHA256: #{ENV.fetch("LATEST_SHA256")}") ||
+            content.sub!(/^SW_PAAS_CLI_SHA256=[a-f0-9]+$/, "SW_PAAS_CLI_SHA256=#{ENV.fetch("LATEST_SHA256")}") ||
               abort("Could not update SW_PAAS_CLI_SHA256")
 
             File.write(path, content)
@@ -121,7 +121,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B "$branch"
           git diff --check
-          git add .github/workflows/nightly-paas-ats.yml
+          git add .github/sw-paas-cli.env
           git commit -m "Update sw-paas CLI to ${LATEST_VERSION}"
           git push --force-with-lease origin "$branch"
 

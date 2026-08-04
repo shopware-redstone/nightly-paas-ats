@@ -33,6 +33,7 @@ Secrets:
 - `SLACK_WEBHOOK_URL`: Slack Incoming Webhook URL used to post nightly deployment and ATS status.
 
 Shopware PaaS Native authentication moved to Shopware Account in July 2026. Personal access tokens tied to migrated user accounts can become invalid; keep this workflow on a current `sw-paas` CLI release and prefer a long-lived service-account token for `SW_PAAS_TOKEN`.
+The pinned `sw-paas` CLI version and Linux x86_64 checksum live in `.github/sw-paas-cli.env`.
 
 Variables:
 
@@ -76,6 +77,6 @@ this workflow yet.
 
 The `Shopware PaaS CLI Update Check` workflow runs weekly and can also be triggered manually.
 It checks the latest `shopware/sw-paas` GitHub release against the pinned
-`SW_PAAS_CLI_VERSION` in `.github/workflows/nightly-paas-ats.yml`. When a newer release is
+`SW_PAAS_CLI_VERSION` in `.github/sw-paas-cli.env`. When a newer release is
 available, it updates the pinned version and Linux x86_64 checksum, then opens or updates a
 pull request for review.

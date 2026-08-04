@@ -138,7 +138,8 @@ jobs:
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"
-          source .github/sw-paas-cli.env
+          SW_PAAS_CLI_VERSION="$(grep -m1 '^SW_PAAS_CLI_VERSION=' .github/sw-paas-cli.env | cut -d= -f2- | tr -d '\r')"
+          SW_PAAS_CLI_SHA256="$(grep -m1 '^SW_PAAS_CLI_SHA256=' .github/sw-paas-cli.env | cut -d= -f2- | tr -d '\r')"
           : "${SW_PAAS_CLI_VERSION:?Missing SW_PAAS_CLI_VERSION in .github/sw-paas-cli.env}"
           : "${SW_PAAS_CLI_SHA256:?Missing SW_PAAS_CLI_SHA256 in .github/sw-paas-cli.env}"
 

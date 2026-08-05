@@ -7176,12 +7176,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "2f76d4432854f00ee721e73618687db3bf053e5a"
+                "reference": "2581003e00c0a6ae7cb6fb78aa4a98433c751949"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/2f76d4432854f00ee721e73618687db3bf053e5a",
-                "reference": "2f76d4432854f00ee721e73618687db3bf053e5a",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/2581003e00c0a6ae7cb6fb78aa4a98433c751949",
+                "reference": "2581003e00c0a6ae7cb6fb78aa4a98433c751949",
                 "shasum": ""
             },
             "require": {
@@ -7414,7 +7414,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-08-04T21:38:46+00:00"
+            "time": "2026-08-05T05:53:03+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

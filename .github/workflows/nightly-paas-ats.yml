@@ -61,6 +61,16 @@ jobs:
           # Fall back to the default GITHUB_TOKEN if no PAT is configured.
           token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
 
+      - name: Checkout workflow configuration
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .workflow-source
+          sparse-checkout: |
+            .github/sw-paas-cli.env
+          sparse-checkout-cone-mode: false
+          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+
       - name: Mark setup stage
         run: echo "DEPLOY_STAGE=Set up PHP" >> "$GITHUB_ENV"
 
@@ -138,10 +148,11 @@ jobs:
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"
-          SW_PAAS_CLI_VERSION="$(grep -m1 '^SW_PAAS_CLI_VERSION=' .github/sw-paas-cli.env | cut -d= -f2- | tr -d '\r')"
-          SW_PAAS_CLI_SHA256="$(grep -m1 '^SW_PAAS_CLI_SHA256=' .github/sw-paas-cli.env | cut -d= -f2- | tr -d '\r')"
-          : "${SW_PAAS_CLI_VERSION:?Missing SW_PAAS_CLI_VERSION in .github/sw-paas-cli.env}"
-          : "${SW_PAAS_CLI_SHA256:?Missing SW_PAAS_CLI_SHA256 in .github/sw-paas-cli.env}"
+          cli_config=".workflow-source/.github/sw-paas-cli.env"
+          SW_PAAS_CLI_VERSION="$(grep -m1 '^SW_PAAS_CLI_VERSION=' "$cli_config" | cut -d= -f2- | tr -d '\r')"
+          SW_PAAS_CLI_SHA256="$(grep -m1 '^SW_PAAS_CLI_SHA256=' "$cli_config" | cut -d= -f2- | tr -d '\r')"
+          : "${SW_PAAS_CLI_VERSION:?Missing SW_PAAS_CLI_VERSION in $cli_config}"
+          : "${SW_PAAS_CLI_SHA256:?Missing SW_PAAS_CLI_SHA256 in $cli_config}"
 
           archive="${RUNNER_TEMP}/sw-paas_Linux_x86_64.tar.gz"
           download_url="https://github.com/shopware/sw-paas/releases/download/${SW_PAAS_CLI_VERSION}/sw-paas_Linux_x86_64.tar.gz"

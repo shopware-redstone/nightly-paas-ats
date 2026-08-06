@@ -2082,21 +2082,21 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "7.15.2",
+            "version": "7.15.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "744101956d78b7c1384d0cbf379db13e859167bf"
+                "reference": "ae311b8f045ea93ce7b1c9cdb7cec06c53f944bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/744101956d78b7c1384d0cbf379db13e859167bf",
-                "reference": "744101956d78b7c1384d0cbf379db13e859167bf",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/ae311b8f045ea93ce7b1c9cdb7cec06c53f944bc",
+                "reference": "ae311b8f045ea93ce7b1c9cdb7cec06c53f944bc",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "guzzlehttp/promises": "^2.5.1",
+                "guzzlehttp/promises": "^2.5.2",
                 "guzzlehttp/psr7": "^2.13",
                 "php": "^7.2.5 || ^8.0",
                 "psr/http-client": "^1.0",
@@ -2190,7 +2190,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/guzzle/issues",
-                "source": "https://github.com/guzzle/guzzle/tree/7.15.2"
+                "source": "https://github.com/guzzle/guzzle/tree/7.15.3"
             },
             "funding": [
                 {
@@ -2206,20 +2206,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-26T23:23:20+00:00"
+            "time": "2026-08-05T19:48:21+00:00"
         },
         {
             "name": "guzzlehttp/promises",
-            "version": "2.5.1",
+            "version": "2.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "9ad1e4fc607446a055b95870c7f668e93b5cff29"
+                "reference": "2823687acff28b2dbe67b2508a6b300e2c3fa4ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/9ad1e4fc607446a055b95870c7f668e93b5cff29",
-                "reference": "9ad1e4fc607446a055b95870c7f668e93b5cff29",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/2823687acff28b2dbe67b2508a6b300e2c3fa4ce",
+                "reference": "2823687acff28b2dbe67b2508a6b300e2c3fa4ce",
                 "shasum": ""
             },
             "require": {
@@ -2274,7 +2274,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/promises/issues",
-                "source": "https://github.com/guzzle/promises/tree/2.5.1"
+                "source": "https://github.com/guzzle/promises/tree/2.5.2"
             },
             "funding": [
                 {
@@ -2290,7 +2290,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-08T15:48:39+00:00"
+            "time": "2026-08-05T19:30:54+00:00"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -7176,12 +7176,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "2581003e00c0a6ae7cb6fb78aa4a98433c751949"
+                "reference": "1623cfe403cd7434053f472fa68788c7c297b138"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/2581003e00c0a6ae7cb6fb78aa4a98433c751949",
-                "reference": "2581003e00c0a6ae7cb6fb78aa4a98433c751949",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/1623cfe403cd7434053f472fa68788c7c297b138",
+                "reference": "1623cfe403cd7434053f472fa68788c7c297b138",
                 "shasum": ""
             },
             "require": {
@@ -7414,7 +7414,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-08-05T05:53:03+00:00"
+            "time": "2026-08-05T14:08:48+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
@@ -14145,16 +14145,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "6.5.1",
+            "version": "6.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "791f8b2e88b78bd71c57d4de923e6d1cadfdae03"
+                "reference": "cec9ec9157513ba27f15513d4983acbe03ce10b8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/791f8b2e88b78bd71c57d4de923e6d1cadfdae03",
-                "reference": "791f8b2e88b78bd71c57d4de923e6d1cadfdae03",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/cec9ec9157513ba27f15513d4983acbe03ce10b8",
+                "reference": "cec9ec9157513ba27f15513d4983acbe03ce10b8",
                 "shasum": ""
             },
             "require": {
@@ -14173,10 +14173,10 @@
             },
             "require-dev": {
                 "doctrine/annotations": "^2.0",
-                "friendsofphp/php-cs-fixer": "^3.62.0",
-                "phpstan/phpstan": "2.2.5",
+                "friendsofphp/php-cs-fixer": "^3.62",
+                "phpstan/phpstan": "^2.2",
                 "phpunit/phpunit": "^11.5 || >=12.5.22",
-                "rector/rector": "^2.3.1"
+                "rector/rector": "^2.3"
             },
             "bin": [
                 "bin/openapi"
@@ -14222,7 +14222,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/6.5.1"
+                "source": "https://github.com/zircote/swagger-php/tree/6.5.2"
             },
             "funding": [
                 {
@@ -14230,7 +14230,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-07-30T04:11:06+00:00"
+            "time": "2026-08-05T02:31:32+00:00"
         }
     ],
     "packages-dev": [],

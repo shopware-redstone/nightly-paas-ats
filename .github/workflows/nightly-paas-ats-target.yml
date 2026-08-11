@@ -1,0 +1,484 @@
+name: Nightly PaaS ATS target
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: Human-readable Shopware target
+        required: true
+        type: string
+      target_slug:
+        description: Filesystem- and artifact-safe target identifier
+        required: true
+        type: string
+      paas_branch:
+        description: Repository branch containing the PaaS application root
+        required: true
+        type: string
+      paas_application:
+        description: Shopware PaaS application name
+        required: true
+        type: string
+      shopware_ref:
+        description: shopware/shopware ref used by ATS
+        required: true
+        type: string
+      ats_config_suffix:
+        description: Suffix used to resolve target-specific ATS variables and secrets
+        required: true
+        type: string
+      force:
+        description: Deploy even when composer.lock did not change
+        required: false
+        default: false
+        type: boolean
+    outputs:
+      overall_result:
+        description: Combined result for deployment and ATS
+        value: ${{ jobs.target-summary.outputs.overall_result }}
+      deployment_result:
+        description: Deployment result (success, failure, or skipped)
+        value: ${{ jobs.target-summary.outputs.deployment_result }}
+      deployment_summary:
+        description: Human-readable deployment summary
+        value: ${{ jobs.target-summary.outputs.deployment_summary }}
+      deployment_stage:
+        description: Last recorded deployment stage
+        value: ${{ jobs.target-summary.outputs.deployment_stage }}
+      deployment_branch:
+        description: PaaS branch deployed by this target
+        value: ${{ jobs.target-summary.outputs.deployment_branch }}
+      deployment_application:
+        description: PaaS application deployed by this target
+        value: ${{ jobs.target-summary.outputs.deployment_application }}
+      deployment_changed:
+        description: Whether composer.lock changed
+        value: ${{ jobs.target-summary.outputs.deployment_changed }}
+      deployment_commit:
+        description: Short PaaS application commit
+        value: ${{ jobs.target-summary.outputs.deployment_commit }}
+      ats_result:
+        description: Combined ATS shard result
+        value: ${{ jobs.target-summary.outputs.ats_result }}
+      ats_summary:
+        description: Human-readable ATS summary
+        value: ${{ jobs.target-summary.outputs.ats_summary }}
+
+permissions:
+  contents: write
+
+jobs:
+  update-and-deploy:
+    name: Update and deploy ${{ inputs.target }}
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_STAGE: Checkout target branch
+      DEPLOY_DECISION: pending
+      DEPLOY_TARGET: ${{ inputs.target }}
+      DEPLOY_BRANCH: ${{ inputs.paas_branch }}
+      DEPLOY_APPLICATION: ${{ inputs.paas_application }}
+    outputs:
+      result: ${{ steps.deployment_summary.outputs.result }}
+      summary: ${{ steps.deployment_summary.outputs.summary }}
+      stage: ${{ steps.deployment_summary.outputs.stage }}
+      branch: ${{ steps.deployment_summary.outputs.branch }}
+      application: ${{ steps.deployment_summary.outputs.application }}
+      changed: ${{ steps.deployment_summary.outputs.changed }}
+      commit: ${{ steps.deployment_summary.outputs.commit }}
+
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.paas_branch }}
+          # Use a PAT so the pushed commit can trigger downstream workflows.
+          # Fall back to the default GITHUB_TOKEN if no PAT is configured.
+          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Checkout workflow configuration
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .workflow-source
+          sparse-checkout: |
+            .github/sw-paas-cli.env
+          sparse-checkout-cone-mode: false
+          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Mark setup stage
+        run: echo "DEPLOY_STAGE=Set up PHP" >> "$GITHUB_ENV"
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: grpc, opentelemetry, redis
+          tools: composer:v2
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ inputs.target_slug }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ inputs.target_slug }}-
+            ${{ runner.os }}-composer-
+
+      - name: Configure Composer for GitHub rate limits
+        run: composer config -g github-oauth.github.com "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Update composer.lock
+        run: |
+          echo "DEPLOY_STAGE=Composer update" >> "$GITHUB_ENV"
+          composer update shopware/platform --with-all-dependencies --no-interaction --no-scripts --no-install
+
+      - name: Check for changes
+        id: changes
+        run: |
+          echo "DEPLOY_STAGE=Check composer.lock changes" >> "$GITHUB_ENV"
+          if git diff --quiet composer.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "DEPLOY_CHANGED=false" >> "$GITHUB_ENV"
+            echo "No changes to composer.lock."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "DEPLOY_CHANGED=true" >> "$GITHUB_ENV"
+            echo "composer.lock has been updated."
+            git diff --stat composer.lock
+          fi
+
+      - name: Commit and push updated composer.lock
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          echo "DEPLOY_STAGE=Commit and push composer.lock" >> "$GITHUB_ENV"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add composer.lock
+          git commit -m "chore(${{ inputs.target }}): update composer.lock [skip ci]"
+          git push origin "HEAD:${{ inputs.paas_branch }}"
+
+      - name: Record deployment decision
+        env:
+          FORCE_DEPLOY: ${{ inputs.force }}
+        run: |
+          if [[ "${{ steps.changes.outputs.changed }}" == "true" || "$FORCE_DEPLOY" == "true" ]]; then
+            echo "DEPLOY_DECISION=deploy" >> "$GITHUB_ENV"
+            echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"
+          else
+            echo "DEPLOY_DECISION=skipped" >> "$GITHUB_ENV"
+            echo "DEPLOY_STAGE=No composer.lock changes" >> "$GITHUB_ENV"
+          fi
+
+      - name: Install Shopware PaaS CLI
+        if: steps.changes.outputs.changed == 'true' || inputs.force
+        shell: bash
+        env:
+          SW_PAAS_DIR: ${{ runner.temp }}/sw-paas
+        run: |
+          set -euo pipefail
+          echo "DEPLOY_STAGE=Install Shopware PaaS CLI" >> "$GITHUB_ENV"
+          cli_config=".workflow-source/.github/sw-paas-cli.env"
+          SW_PAAS_CLI_VERSION="$(grep -m1 '^SW_PAAS_CLI_VERSION=' "$cli_config" | cut -d= -f2- | tr -d '\r')"
+          SW_PAAS_CLI_SHA256="$(grep -m1 '^SW_PAAS_CLI_SHA256=' "$cli_config" | cut -d= -f2- | tr -d '\r')"
+          : "${SW_PAAS_CLI_VERSION:?Missing SW_PAAS_CLI_VERSION in $cli_config}"
+          : "${SW_PAAS_CLI_SHA256:?Missing SW_PAAS_CLI_SHA256 in $cli_config}"
+
+          archive="${RUNNER_TEMP}/sw-paas_Linux_x86_64.tar.gz"
+          download_url="https://github.com/shopware/sw-paas/releases/download/${SW_PAAS_CLI_VERSION}/sw-paas_Linux_x86_64.tar.gz"
+
+          mkdir -p "$SW_PAAS_DIR/bin"
+          curl -fsSL "$download_url" -o "$archive"
+          echo "${SW_PAAS_CLI_SHA256}  ${archive}" | sha256sum --check -
+          tar -xzf "$archive" -C "$SW_PAAS_DIR/bin" sw-paas
+          chmod +x "$SW_PAAS_DIR/bin/sw-paas"
+
+          echo "$SW_PAAS_DIR/bin" >> "$GITHUB_PATH"
+          "$SW_PAAS_DIR/bin/sw-paas" --version
+
+      - name: Validate Shopware PaaS target access
+        if: steps.changes.outputs.changed == 'true' || inputs.force
+        env:
+          SW_PAAS_TOKEN: ${{ secrets.SW_PAAS_TOKEN }}
+          SW_PAAS_ORGANIZATION_ID: ${{ vars.SW_PAAS_ORGANIZATION_ID }}
+          SW_PAAS_PROJECT_ID: ${{ vars.SW_PAAS_PROJECT_ID }}
+          SW_PAAS_APPLICATION: ${{ inputs.paas_application }}
+        run: |
+          set -euo pipefail
+          echo "DEPLOY_STAGE=Validate Shopware PaaS target access" >> "$GITHUB_ENV"
+          SW_PAAS_STATE_HOME="${RUNNER_TEMP}/sw-paas-context.yaml"
+
+          : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
+          : "${SW_PAAS_ORGANIZATION_ID:?Missing GitHub Actions variable SW_PAAS_ORGANIZATION_ID}"
+          : "${SW_PAAS_PROJECT_ID:?Missing GitHub Actions variable SW_PAAS_PROJECT_ID}"
+          : "${SW_PAAS_APPLICATION:?Missing PaaS application}"
+
+          printf 'organizationId: %s\nprojectId: %s\n' "$SW_PAAS_ORGANIZATION_ID" "$SW_PAAS_PROJECT_ID" > "$SW_PAAS_STATE_HOME"
+
+          sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery application get \
+            --token "$SW_PAAS_TOKEN" \
+            --application "$SW_PAAS_APPLICATION"
+
+      - name: Deploy updated application
+        if: steps.changes.outputs.changed == 'true' || inputs.force
+        env:
+          SW_PAAS_TOKEN: ${{ secrets.SW_PAAS_TOKEN }}
+          SW_PAAS_ORGANIZATION_ID: ${{ vars.SW_PAAS_ORGANIZATION_ID }}
+          SW_PAAS_PROJECT_ID: ${{ vars.SW_PAAS_PROJECT_ID }}
+          SW_PAAS_APPLICATION: ${{ inputs.paas_application }}
+        run: |
+          set -euo pipefail
+          echo "DEPLOY_STAGE=Shopware PaaS application update" >> "$GITHUB_ENV"
+          SW_PAAS_STATE_HOME="${RUNNER_TEMP}/sw-paas-context.yaml"
+
+          : "${SW_PAAS_TOKEN:?Missing GitHub Actions secret SW_PAAS_TOKEN}"
+          : "${SW_PAAS_ORGANIZATION_ID:?Missing GitHub Actions variable SW_PAAS_ORGANIZATION_ID}"
+          : "${SW_PAAS_PROJECT_ID:?Missing GitHub Actions variable SW_PAAS_PROJECT_ID}"
+          : "${SW_PAAS_APPLICATION:?Missing PaaS application}"
+
+          printf 'organizationId: %s\nprojectId: %s\n' "$SW_PAAS_ORGANIZATION_ID" "$SW_PAAS_PROJECT_ID" > "$SW_PAAS_STATE_HOME"
+
+          commit_sha="$(git rev-parse HEAD)"
+          max_attempts=3
+          retry_delay_seconds=120
+
+          for attempt in $(seq 1 "$max_attempts"); do
+            echo "::group::PaaS deploy attempt ${attempt}/${max_attempts}"
+            echo "Updating application ${SW_PAAS_APPLICATION} in project ${SW_PAAS_PROJECT_ID} to ${commit_sha}."
+
+            if sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery application update \
+              --token "$SW_PAAS_TOKEN" \
+              --application "$SW_PAAS_APPLICATION" \
+              --commit-sha "$commit_sha"; then
+              echo "DEPLOY_STAGE=Deployment completed" >> "$GITHUB_ENV"
+              echo "::endgroup::"
+              exit 0
+            else
+              exit_code=$?
+            fi
+
+            echo "::warning title=PaaS deployment attempt failed::sw-paas application update exited with code ${exit_code} for ${SW_PAAS_APPLICATION} at ${commit_sha}."
+            echo "::endgroup::"
+
+            if [[ "$attempt" -eq "$max_attempts" ]]; then
+              echo "PaaS deployment failed after ${max_attempts} attempts."
+              exit "$exit_code"
+            fi
+
+            echo "PaaS deployment attempt ${attempt} failed; retrying in ${retry_delay_seconds}s."
+            sleep "$retry_delay_seconds"
+          done
+
+      - name: Record deployment summary
+        id: deployment_summary
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${DEPLOY_DECISION:-pending}" == "skipped" && "$JOB_STATUS" == "success" ]]; then
+            result="skipped"
+            summary="No deployment needed; composer.lock did not change."
+          elif [[ "$JOB_STATUS" == "success" ]]; then
+            result="success"
+            summary="Deployment completed."
+          else
+            result="failure"
+            summary="Deployment workflow failed during: ${DEPLOY_STAGE:-unknown}."
+          fi
+
+          short_sha="${COMMIT_SHA:0:8}"
+          if git rev-parse --short=8 HEAD > /tmp/deploy-commit 2>/dev/null; then
+            short_sha="$(cat /tmp/deploy-commit)"
+          fi
+
+          {
+            echo "result=$result"
+            echo "summary=$summary"
+            echo "stage=${DEPLOY_STAGE:-unknown}"
+            echo "branch=${DEPLOY_BRANCH:-unknown}"
+            echo "application=${DEPLOY_APPLICATION:-unknown}"
+            echo "changed=${DEPLOY_CHANGED:-unknown}"
+            echo "commit=$short_sha"
+          } >> "$GITHUB_OUTPUT"
+
+  ats-platform:
+    name: ATS Platform ${{ inputs.target }} shard ${{ matrix.shard }}/${{ matrix.total_shards }}
+    needs: update-and-deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: 1
+            total_shards: 2
+          - shard: 2
+            total_shards: 2
+
+    env:
+      ATS_CONFIG_SUFFIX: ${{ inputs.ats_config_suffix }}
+      SHOPWARE_ACCEPTANCE_INSTANCE_TYPE: paas
+      APP_URL: ${{ vars[format('ATS_APP_URL_{0}', inputs.ats_config_suffix)] || secrets[format('ATS_APP_URL_{0}', inputs.ats_config_suffix)] }}
+      SHOPWARE_ACCESS_KEY_ID: ${{ secrets[format('ATS_SHOPWARE_ACCESS_KEY_ID_{0}', inputs.ats_config_suffix)] }}
+      SHOPWARE_SECRET_ACCESS_KEY: ${{ secrets[format('ATS_SHOPWARE_SECRET_ACCESS_KEY_{0}', inputs.ats_config_suffix)] }}
+
+    steps:
+      - name: Checkout Shopware
+        uses: actions/checkout@v4
+        with:
+          repository: shopware/shopware
+          ref: ${{ inputs.shopware_ref }}
+          path: shopware
+
+      - name: Checkout ATS workflow configuration
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .workflow-source
+          sparse-checkout: |
+            .github/ats-playwright.config.ts
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: shopware/tests/acceptance/package-lock.json
+
+      - name: Validate ATS configuration
+        run: |
+          : "${APP_URL:?Missing GitHub Actions variable or secret ATS_APP_URL_${ATS_CONFIG_SUFFIX}}"
+          : "${SHOPWARE_ACCESS_KEY_ID:?Missing GitHub Actions secret ATS_SHOPWARE_ACCESS_KEY_ID_${ATS_CONFIG_SUFFIX}}"
+          : "${SHOPWARE_SECRET_ACCESS_KEY:?Missing GitHub Actions secret ATS_SHOPWARE_SECRET_ACCESS_KEY_${ATS_CONFIG_SUFFIX}}"
+
+      - name: Install ATS dependencies
+        working-directory: shopware/tests/acceptance
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: shopware/tests/acceptance
+        run: npx playwright install --with-deps chromium
+
+      - name: Prepare PaaS Playwright configuration
+        run: cp .workflow-source/.github/ats-playwright.config.ts shopware/tests/acceptance/playwright.paas.config.ts
+
+      - name: Run ATS Platform suite
+        working-directory: shopware/tests/acceptance
+        run: npx playwright test --config=playwright.paas.config.ts --workers=1 --project=Platform --shard=${{ matrix.shard }}/${{ matrix.total_shards }}
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ats-platform-${{ inputs.target_slug }}-shard-${{ matrix.shard }}-of-${{ matrix.total_shards }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            shopware/tests/acceptance/test-results/
+            shopware/tests/acceptance/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  target-summary:
+    name: Summarize ${{ inputs.target }}
+    needs:
+      - update-and-deploy
+      - ats-platform
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      overall_result: ${{ steps.summary.outputs.overall_result }}
+      deployment_result: ${{ steps.summary.outputs.deployment_result }}
+      deployment_summary: ${{ steps.summary.outputs.deployment_summary }}
+      deployment_stage: ${{ steps.summary.outputs.deployment_stage }}
+      deployment_branch: ${{ steps.summary.outputs.deployment_branch }}
+      deployment_application: ${{ steps.summary.outputs.deployment_application }}
+      deployment_changed: ${{ steps.summary.outputs.deployment_changed }}
+      deployment_commit: ${{ steps.summary.outputs.deployment_commit }}
+      ats_result: ${{ steps.summary.outputs.ats_result }}
+      ats_summary: ${{ steps.summary.outputs.ats_summary }}
+
+    steps:
+      - name: Record target summary
+        id: summary
+        env:
+          TARGET: ${{ inputs.target }}
+          DEPLOY_JOB_RESULT: ${{ needs.update-and-deploy.result }}
+          DEPLOY_RESULT: ${{ needs.update-and-deploy.outputs.result }}
+          DEPLOY_SUMMARY: ${{ needs.update-and-deploy.outputs.summary }}
+          DEPLOY_STAGE: ${{ needs.update-and-deploy.outputs.stage }}
+          DEPLOY_BRANCH: ${{ needs.update-and-deploy.outputs.branch }}
+          DEPLOY_APPLICATION: ${{ needs.update-and-deploy.outputs.application }}
+          DEPLOY_CHANGED: ${{ needs.update-and-deploy.outputs.changed }}
+          DEPLOY_COMMIT: ${{ needs.update-and-deploy.outputs.commit }}
+          ATS_JOB_RESULT: ${{ needs.ats-platform.result }}
+          ATS_SHARDS: "2"
+        run: |
+          set -euo pipefail
+
+          deployment_result="${DEPLOY_RESULT:-$DEPLOY_JOB_RESULT}"
+          deployment_summary="${DEPLOY_SUMMARY:-Deployment job result: ${DEPLOY_JOB_RESULT}.}"
+          if [[ "$DEPLOY_JOB_RESULT" != "success" ]]; then
+            deployment_result="$DEPLOY_JOB_RESULT"
+            deployment_summary="${DEPLOY_SUMMARY:-Deployment job failed.}"
+          fi
+
+          case "$ATS_JOB_RESULT" in
+            success)
+              ats_summary="ATS Platform passed across ${ATS_SHARDS} shards."
+              ;;
+            failure)
+              ats_summary="ATS Platform failed; inspect the target-specific Playwright artifacts."
+              ;;
+            skipped)
+              if [[ "$DEPLOY_JOB_RESULT" == "failure" ]]; then
+                ats_summary="ATS Platform was skipped because deployment failed."
+              else
+                ats_summary="ATS Platform was skipped."
+              fi
+              ;;
+            cancelled)
+              ats_summary="ATS Platform was cancelled."
+              ;;
+            *)
+              ats_summary="ATS Platform result: ${ATS_JOB_RESULT:-unknown}."
+              ;;
+          esac
+
+          if [[ "$DEPLOY_JOB_RESULT" == "success" && "$ATS_JOB_RESULT" == "success" ]]; then
+            overall_result="success"
+          else
+            overall_result="failure"
+          fi
+
+          {
+            echo "overall_result=$overall_result"
+            echo "deployment_result=$deployment_result"
+            echo "deployment_summary=$deployment_summary"
+            echo "deployment_stage=${DEPLOY_STAGE:-unknown}"
+            echo "deployment_branch=${DEPLOY_BRANCH:-${{ inputs.paas_branch }}}"
+            echo "deployment_application=${DEPLOY_APPLICATION:-${{ inputs.paas_application }}}"
+            echo "deployment_changed=${DEPLOY_CHANGED:-unknown}"
+            echo "deployment_commit=${DEPLOY_COMMIT:-unknown}"
+            echo "ats_result=${ATS_JOB_RESULT:-unknown}"
+            echo "ats_summary=$ats_summary"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### ${TARGET}"
+            echo
+            echo "- Overall: ${overall_result}"
+            echo "- Deployment: ${deployment_result} — ${deployment_summary}"
+            echo "- ATS: ${ATS_JOB_RESULT} — ${ats_summary}"
+          } >> "$GITHUB_STEP_SUMMARY"

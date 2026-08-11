@@ -10,5 +10,3 @@ build:
     pre-assets:
       - 'SHOPWARE_SKIP_ENTITY_SCHEMA_DUMP=1 bin/build-administration.sh'
       - 'SHOPWARE_SKIP_THEME_COMPILE=1 bin/build-storefront.sh'
-      - 'mkdir -p public/bundles/administration/administration'
-      - 'cp -R vendor/shopware/platform/src/Administration/Resources/public/administration/. public/bundles/administration/administration/'

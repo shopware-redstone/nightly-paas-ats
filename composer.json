@@ -3,8 +3,8 @@
   "type": "project",
   "require": {
     "composer-runtime-api": "^2.0",
-    "shopware/platform": "dev-trunk",
-    "shopware/k8s-meta": "^2.0",
+    "shopware/platform": "6.6.x-dev",
+    "shopware/k8s-meta": "^1.0",
     "symfony/flex": "~2"
   },
   "repositories": [

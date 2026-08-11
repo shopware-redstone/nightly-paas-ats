@@ -1,6 +1,6 @@
 deployment:
   hooks:
-    # dev-trunk can keep the same Shopware version while adding migrations.
+    # A maintained branch can keep the same Shopware version while adding migrations.
     # Apply additive core migrations before deployment-helper update tools read new columns.
     pre-update: |
       php bin/console -n database:migrate --all

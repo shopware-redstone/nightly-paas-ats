@@ -1,0 +1,4 @@
+shopware:
+  api:
+    jwt_key:
+      use_app_secret: true

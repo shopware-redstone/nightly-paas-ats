@@ -2,8 +2,9 @@ name: Shopware PaaS CLI Update Check
 
 on:
   schedule:
-    # Check weekly for a newer sw-paas CLI without adding daily notification noise.
-    - cron: "25 6 * * 1"
+    # Check every morning for a newer sw-paas CLI. Updates auto-merge, so this
+    # doesn't add manual review noise even when it runs daily.
+    - cron: "25 6 * * *"
   workflow_dispatch:
 
 permissions:

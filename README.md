@@ -16,6 +16,8 @@ The workflow is intentionally split from `shopware/shopware`: this repo manages 
 
 PaaS application branches are separate because Shopware PaaS builds from the repository root at a commit SHA. Keeping each target in its own branch lets each branch carry its own `composer.json`, `composer.lock`, and `.shopware-project.yaml` without mixing version-specific files.
 
+`main`, `paas/trunk`, and `paas/6.6.x` are protected from deletion by a repository ruleset. All other branches are deleted automatically once their pull request is merged (see [`docs/branch-layout.md`](docs/branch-layout.md)).
+
 ## Current Target
 
 | Target | Branch | PaaS application | Composer constraint |

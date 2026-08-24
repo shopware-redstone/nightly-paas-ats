@@ -2,7 +2,7 @@ name: Shopware PaaS CLI Update Check
 
 on:
   schedule:
-    # Run at midnight UTC, 2 hours ahead of the 02:00 UTC nightly-paas-ats.yml
+    # Run at midnight UTC, 2 hours before the 02:00 UTC nightly-paas-ats.yml
     # run, so a merged CLI bump is on main before that workflow checks out and
     # uses the pinned sw-paas CLI. The gap covers GitHub's own scheduling
     # delay (see the note in nightly-paas-ats.yml) plus this check's runtime.

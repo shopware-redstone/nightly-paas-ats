@@ -166,6 +166,13 @@ jobs:
               --assignee "$PR_ASSIGNEE"
           fi
 
-          # No required checks/reviews are configured on main, so this merges as soon as
-          # the PR is mergeable. --auto still applies if branch protection is added later.
-          gh pr merge "$branch" --repo "$GITHUB_REPOSITORY" --squash --auto --delete-branch
+          # --auto requires the repo's "Allow auto-merge" setting to be on; when it's off
+          # (as it is here today) gh pr merge --auto fails outright even though an
+          # immediate merge would succeed. Try --auto first so this keeps working if that
+          # setting is ever enabled, then fall back to a plain merge instead of failing
+          # the job every week. The head branch is deleted automatically by the repo's
+          # "Automatically delete head branches" setting, so --delete-branch isn't needed.
+          if ! gh pr merge "$branch" --repo "$GITHUB_REPOSITORY" --squash --auto; then
+            echo "::notice title=Auto-merge unavailable::'Allow auto-merge' is disabled for this repository (or the PR can't be queued for it); merging immediately instead."
+            gh pr merge "$branch" --repo "$GITHUB_REPOSITORY" --squash
+          fi

@@ -2,8 +2,11 @@ name: Shopware PaaS CLI Update Check
 
 on:
   schedule:
-    # Check weekly for a newer sw-paas CLI without adding daily notification noise.
-    - cron: "25 6 * * 1"
+    # Run at midnight UTC, 2 hours before the 02:00 UTC nightly-paas-ats.yml
+    # run, so a merged CLI bump is on main before that workflow checks out and
+    # uses the pinned sw-paas CLI. The gap covers GitHub's own scheduling
+    # delay (see the note in nightly-paas-ats.yml) plus this check's runtime.
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
@@ -110,10 +113,15 @@ jobs:
           LATEST_VERSION: ${{ steps.sw_paas.outputs.latest_version }}
           LATEST_SHA256: ${{ steps.sw_paas.outputs.latest_sha256 }}
           ASSET_URL: ${{ steps.sw_paas.outputs.asset_url }}
+          PR_ASSIGNEE: ${{ vars.SW_PAAS_CLI_UPDATE_PR_ASSIGNEE || 'yusufttur' }}
         run: |
           set -euo pipefail
 
-          branch="codex/update-sw-paas-cli-${LATEST_VERSION}"
+          # Stable branch name (no version suffix, outside the codex/* namespace used by
+          # actual Codex agent branches): every run force-updates the same PR to whatever
+          # is latest, instead of leaving prior in-flight PRs to rot when a newer release
+          # ships before the last one is merged.
+          branch="automation/sw-paas-cli-update"
           title="Update sw-paas CLI to ${LATEST_VERSION}"
           body_file="${RUNNER_TEMP}/sw-paas-cli-update-pr.md"
 
@@ -123,6 +131,10 @@ jobs:
           git diff --check
           git add .github/sw-paas-cli.env
           git commit -m "Update sw-paas CLI to ${LATEST_VERSION}"
+          # This branch is fully regenerated from main on every run, so it has no
+          # shared history with whatever the remote currently holds. Fetch the remote
+          # branch first so --force-with-lease has a baseline to compare against.
+          git fetch origin "$branch":"refs/remotes/origin/$branch" >/dev/null 2>&1 || true
           git push --force-with-lease origin "$branch"
 
           cat > "$body_file" <<BODY
@@ -145,12 +157,25 @@ jobs:
             gh pr edit "$branch" \
               --repo "$GITHUB_REPOSITORY" \
               --title "$title" \
-              --body-file "$body_file"
+              --body-file "$body_file" \
+              --add-assignee "$PR_ASSIGNEE"
           else
             gh pr create \
               --repo "$GITHUB_REPOSITORY" \
               --base main \
               --head "$branch" \
               --title "$title" \
-              --body-file "$body_file"
+              --body-file "$body_file" \
+              --assignee "$PR_ASSIGNEE"
+          fi
+
+          # --auto requires the repo's "Allow auto-merge" setting to be on; when it's off
+          # (as it is here today) gh pr merge --auto fails outright even though an
+          # immediate merge would succeed. Try --auto first so this keeps working if that
+          # setting is ever enabled, then fall back to a plain merge instead of failing
+          # the job every week. The head branch is deleted automatically by the repo's
+          # "Automatically delete head branches" setting, so --delete-branch isn't needed.
+          if ! gh pr merge "$branch" --repo "$GITHUB_REPOSITORY" --squash --auto; then
+            echo "::notice title=Auto-merge unavailable::'Allow auto-merge' is disabled for this repository (or the PR can't be queued for it); merging immediately instead."
+            gh pr merge "$branch" --repo "$GITHUB_REPOSITORY" --squash
           fi

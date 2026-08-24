@@ -110,7 +110,7 @@ jobs:
           LATEST_VERSION: ${{ steps.sw_paas.outputs.latest_version }}
           LATEST_SHA256: ${{ steps.sw_paas.outputs.latest_sha256 }}
           ASSET_URL: ${{ steps.sw_paas.outputs.asset_url }}
-          PR_ASSIGNEE: yusufttur
+          PR_ASSIGNEE: ${{ vars.SW_PAAS_CLI_UPDATE_PR_ASSIGNEE || 'yusufttur' }}
         run: |
           set -euo pipefail
 
@@ -129,9 +129,10 @@ jobs:
           git add .github/sw-paas-cli.env
           git commit -m "Update sw-paas CLI to ${LATEST_VERSION}"
           # This branch is fully regenerated from main on every run, so it has no
-          # shared history with whatever the remote currently holds. force-with-lease
-          # would reject that as "stale info"; a plain force push is what we want.
-          git push --force origin "$branch"
+          # shared history with whatever the remote currently holds. Fetch the remote
+          # branch first so --force-with-lease has a baseline to compare against.
+          git fetch origin "$branch":"refs/remotes/origin/$branch" >/dev/null 2>&1 || true
+          git push --force-with-lease origin "$branch"
 
           cat > "$body_file" <<BODY
           ## Summary

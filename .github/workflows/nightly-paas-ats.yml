@@ -362,7 +362,68 @@ jobs:
       contents: read
 
     steps:
-      - name: Notify Slack nightly status
+      - name: Checkout workflow scripts
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/scripts/parse-ats-results.py
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Fetch and parse ATS job logs
+        id: parse_logs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          # Fetch all jobs from this workflow run
+          jobs=$(gh api /repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs --jq '.jobs[] | select(.name | contains("ATS Platform")) | {id, name}')
+
+          if [[ -z "$jobs" ]]; then
+            echo "test_details=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Collect logs from all ATS Platform shard jobs
+          combined_logs=""
+          while IFS= read -r job_id job_name; do
+            echo "Fetching logs for: $job_name"
+            job_logs=$(gh api /repos/${{ github.repository }}/actions/jobs/$job_id/logs --jq -r '.') 2>/dev/null || true
+            if [[ -n "$job_logs" ]]; then
+              combined_logs+="=== $job_name ===$'\n'"
+              combined_logs+="$job_logs"$'\n'
+            fi
+          done < <(echo "$jobs" | jq -r '.id + " " + .name')
+
+          if [[ -z "$combined_logs" ]]; then
+            echo "test_details=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Save logs to file for parsing
+          echo "$combined_logs" > /tmp/ats-logs.txt
+
+          # Parse logs with Python script to extract failed/flaky tests
+          test_details=$(python3 .github/scripts/parse-ats-results.py - < /tmp/ats-logs.txt 2>/dev/null || echo "")
+
+          if [[ -n "$test_details" ]]; then
+            # Escape for output variable
+            echo "test_details<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$test_details" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          else
+            echo "test_details=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Notify Slack main status
+        id: slack_main
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -396,7 +457,7 @@ jobs:
               ats_summary="ATS Platform passed across ${ATS_SHARDS} shards."
               ;;
             failure)
-              ats_summary="ATS Platform failed. Check Playwright artifacts for the failing shard."
+              ats_summary="ATS Platform failed. Check logs for details."
               ;;
             skipped)
               ats_summary="ATS Platform was skipped."
@@ -513,4 +574,38 @@ jobs:
             exit 1
           fi
 
-          echo "Slack notification sent."
+          echo "Slack main notification sent."
+
+      - name: Post test details as separate message
+        if: steps.parse_logs.outputs.test_details != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEST_DETAILS: ${{ steps.parse_logs.outputs.test_details }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${SLACK_WEBHOOK_URL:-}" ]]; then
+            echo "::warning::SLACK_WEBHOOK_URL not configured; skipping test details message."
+            exit 0
+          fi
+
+          # Post test details as a follow-up message
+          payload="$(jq -n \
+            --arg text "$TEST_DETAILS" \
+            '{
+              text: $text,
+              mrkdwn: true
+            }')"
+
+          response_file="${RUNNER_TEMP}/slack-details-response.txt"
+          if ! http_status="$(curl -sS -o "$response_file" -w "%{http_code}" -H "Content-Type: application/json" -d "$payload" "$SLACK_WEBHOOK_URL")"; then
+            echo "::warning::Could not post test details follow-up message."
+            exit 0
+          fi
+
+          if (( http_status < 200 || http_status >= 300 )); then
+            echo "::warning::Slack test details message returned HTTP ${http_status}."
+            exit 0
+          fi
+
+          echo "Test details message sent."

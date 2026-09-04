@@ -141,36 +141,62 @@ jobs:
 
       - name: Notify Slack main status
         id: slack_main
+        # FIX: Access outputs conditionally based on job result to avoid accessing
+        # undefined outputs from skipped jobs. GitHub Actions doesn't resolve
+        # outputs for skipped jobs, so we provide empty defaults.
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TARGET_SELECTION: ${{ github.event_name == 'workflow_dispatch' && inputs.target || 'all' }}
 
           TRUNK_CALL_RESULT: ${{ needs.trunk.result }}
-          TRUNK_OVERALL_RESULT: ${{ needs.trunk.outputs.overall_result }}
-          TRUNK_DEPLOY_RESULT: ${{ needs.trunk.outputs.deployment_result }}
-          TRUNK_DEPLOY_SUMMARY: ${{ needs.trunk.outputs.deployment_summary }}
-          TRUNK_DEPLOY_STAGE: ${{ needs.trunk.outputs.deployment_stage }}
-          TRUNK_DEPLOY_BRANCH: ${{ needs.trunk.outputs.deployment_branch }}
-          TRUNK_DEPLOY_APPLICATION: ${{ needs.trunk.outputs.deployment_application }}
-          TRUNK_DEPLOY_CHANGED: ${{ needs.trunk.outputs.deployment_changed }}
-          TRUNK_DEPLOY_COMMIT: ${{ needs.trunk.outputs.deployment_commit }}
-          TRUNK_ATS_RESULT: ${{ needs.trunk.outputs.ats_result }}
-          TRUNK_ATS_SUMMARY: ${{ needs.trunk.outputs.ats_summary }}
+          TRUNK_OVERALL_RESULT: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.overall_result }}
+          TRUNK_DEPLOY_RESULT: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.deployment_result }}
+          TRUNK_DEPLOY_SUMMARY: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.deployment_summary }}
+          TRUNK_DEPLOY_STAGE: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.deployment_stage }}
+          TRUNK_DEPLOY_BRANCH: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.deployment_branch }}
+          TRUNK_DEPLOY_APPLICATION: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.deployment_application }}
+          TRUNK_DEPLOY_CHANGED: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.deployment_changed }}
+          TRUNK_DEPLOY_COMMIT: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.deployment_commit }}
+          TRUNK_ATS_RESULT: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.ats_result }}
+          TRUNK_ATS_SUMMARY: ${{ needs.trunk.result == 'skipped' && '' || needs.trunk.outputs.ats_summary }}
 
           V66_CALL_RESULT: ${{ needs.v66.result }}
-          V66_OVERALL_RESULT: ${{ needs.v66.outputs.overall_result }}
-          V66_DEPLOY_RESULT: ${{ needs.v66.outputs.deployment_result }}
-          V66_DEPLOY_SUMMARY: ${{ needs.v66.outputs.deployment_summary }}
-          V66_DEPLOY_STAGE: ${{ needs.v66.outputs.deployment_stage }}
-          V66_DEPLOY_BRANCH: ${{ needs.v66.outputs.deployment_branch }}
-          V66_DEPLOY_APPLICATION: ${{ needs.v66.outputs.deployment_application }}
-          V66_DEPLOY_CHANGED: ${{ needs.v66.outputs.deployment_changed }}
-          V66_DEPLOY_COMMIT: ${{ needs.v66.outputs.deployment_commit }}
-          V66_ATS_RESULT: ${{ needs.v66.outputs.ats_result }}
-          V66_ATS_SUMMARY: ${{ needs.v66.outputs.ats_summary }}
+          V66_OVERALL_RESULT: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.overall_result }}
+          V66_DEPLOY_RESULT: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.deployment_result }}
+          V66_DEPLOY_SUMMARY: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.deployment_summary }}
+          V66_DEPLOY_STAGE: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.deployment_stage }}
+          V66_DEPLOY_BRANCH: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.deployment_branch }}
+          V66_DEPLOY_APPLICATION: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.deployment_application }}
+          V66_DEPLOY_CHANGED: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.deployment_changed }}
+          V66_DEPLOY_COMMIT: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.deployment_commit }}
+          V66_ATS_RESULT: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.ats_result }}
+          V66_ATS_SUMMARY: ${{ needs.v66.result == 'skipped' && '' || needs.v66.outputs.ats_summary }}
         run: |
-          set -euo pipefail
+          # Use +u instead of -u to allow undefined variables (they'll be empty strings)
+          set -eo pipefail
+
+          # Ensure variables are defined (they'll be empty if jobs were skipped)
+          : "${TRUNK_OVERALL_RESULT:=}"
+          : "${V66_OVERALL_RESULT:=}"
+          : "${TRUNK_DEPLOY_RESULT:=}"
+          : "${V66_DEPLOY_RESULT:=}"
+          : "${TRUNK_DEPLOY_SUMMARY:=}"
+          : "${V66_DEPLOY_SUMMARY:=}"
+          : "${TRUNK_DEPLOY_STAGE:=}"
+          : "${V66_DEPLOY_STAGE:=}"
+          : "${TRUNK_DEPLOY_BRANCH:=}"
+          : "${V66_DEPLOY_BRANCH:=}"
+          : "${TRUNK_DEPLOY_APPLICATION:=}"
+          : "${V66_DEPLOY_APPLICATION:=}"
+          : "${TRUNK_DEPLOY_CHANGED:=}"
+          : "${V66_DEPLOY_CHANGED:=}"
+          : "${TRUNK_DEPLOY_COMMIT:=}"
+          : "${V66_DEPLOY_COMMIT:=}"
+          : "${TRUNK_ATS_RESULT:=}"
+          : "${V66_ATS_RESULT:=}"
+          : "${TRUNK_ATS_SUMMARY:=}"
+          : "${V66_ATS_SUMMARY:=}"
 
           deploy_result="${DEPLOY_RESULT:-$DEPLOY_JOB_RESULT}"
           deploy_summary="${DEPLOY_SUMMARY:-Deployment job result: ${DEPLOY_JOB_RESULT}.}"

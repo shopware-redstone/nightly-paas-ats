@@ -28,3 +28,9 @@ The branch tracks `shopware/platform: dev-trunk`.
 ## ATS
 
 Acceptance tests should be run from `shopware/shopware` after a target deployment succeeds. The test runner should treat the PaaS URL as the system under test and upload Playwright/ATS artifacts for every nightly run.
+
+## Branch protection and cleanup
+
+`main`, `paas/trunk`, and `paas/6.6.x` are the long-lived branches for this repository and are protected from deletion via a repository ruleset. They should never be removed, including by branch-cleanup automation.
+
+All other branches (e.g. feature or app branches opened for a pull request) are deleted automatically once their pull request is merged, via the repository's "Automatically delete head branches" setting.

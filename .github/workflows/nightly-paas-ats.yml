@@ -393,14 +393,20 @@ jobs:
 
           # Collect logs from all ATS Platform shard jobs
           combined_logs=""
-          while IFS= read -r job_id job_name; do
+          while IFS=$'\t' read -r job_id job_name; do
             echo "Fetching logs for: $job_name"
-            job_logs=$(gh api /repos/${{ github.repository }}/actions/jobs/$job_id/logs --jq -r '.') 2>/dev/null || true
+            logs_zip="${RUNNER_TEMP}/job-${job_id}-logs.zip"
+            job_logs=""
+
+            if gh api "/repos/${GH_REPO}/actions/jobs/${job_id}/logs" > "$logs_zip" 2>/dev/null; then
+              job_logs="$(unzip -p "$logs_zip" 2>/dev/null || true)"
+            fi
+
             if [[ -n "$job_logs" ]]; then
-              combined_logs+="=== $job_name ===$'\n'"
+              combined_logs+="=== $job_name ==="$'\n'
               combined_logs+="$job_logs"$'\n'
             fi
-          done < <(echo "$jobs" | jq -r '.id + " " + .name')
+          done < <(echo "$jobs" | jq -r '[.id, .name] | @tsv')
 
           if [[ -z "$combined_logs" ]]; then
             echo "test_details=" >> "$GITHUB_OUTPUT"

@@ -89,8 +89,6 @@ def main():
     
     if message:
         print(message)
-    else:
-        print("No failed or flaky tests found.")
 
 if __name__ == "__main__":
     main()

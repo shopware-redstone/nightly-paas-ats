@@ -25,7 +25,7 @@ def parse_playwright_output(log_text: str) -> tuple:
     lines = log_text.split('\n')
     current_section = None
     
-    for i, line in enumerate(lines):
+    for line in lines:
         # Look for section headers like "  3 failed" or "  2 flaky"
         if re.search(r'^\s+\d+\s+failed', line):
             current_section = 'failed'

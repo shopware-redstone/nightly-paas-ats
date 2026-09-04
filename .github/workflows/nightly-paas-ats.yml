@@ -407,7 +407,7 @@ jobs:
               combined_logs+="=== $job_name ==="$'\n'
               combined_logs+="$job_logs"$'\n'
             fi
-          done < <(echo "$jobs" | jq -r '[.id, .name] | @tsv')
+          done < <(printf '%s\n' "$jobs" | jq -r '[.id, .name] | @tsv')
 
           if [[ -z "$combined_logs" ]]; then
             echo "test_details=" >> "$GITHUB_OUTPUT"

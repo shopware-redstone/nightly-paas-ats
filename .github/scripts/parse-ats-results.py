@@ -22,7 +22,7 @@ def parse_playwright_output(log_text: str) -> tuple:
     failed_tests = []
     flaky_tests = []
     
-    lines = log_text.split('\n')
+    lines = log_text.splitlines()
     current_section = None
     
     for line in lines:

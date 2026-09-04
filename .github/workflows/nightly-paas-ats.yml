@@ -393,32 +393,31 @@ jobs:
           fi
 
           # Collect logs from all ATS Platform shard jobs
-          combined_logs=""
+          combined_logs_file="${RUNNER_TEMP}/ats-logs.txt"
+          : > "$combined_logs_file"
           while IFS=$'\t' read -r job_id job_name; do
             echo "Fetching logs for: $job_name"
             logs_zip="${RUNNER_TEMP}/job-${job_id}-logs.zip"
-            job_logs=""
+            job_logs_file="${RUNNER_TEMP}/job-${job_id}-logs.txt"
 
             if gh api "/repos/${GH_REPO}/actions/jobs/${job_id}/logs" > "$logs_zip" 2>/dev/null; then
-              job_logs="$(unzip -p "$logs_zip" 2>/dev/null || true)"
-            fi
-
-            if [[ -n "$job_logs" ]]; then
-              combined_logs+="=== $job_name ==="$'\n'
-              combined_logs+="$job_logs"$'\n'
+              if unzip -p "$logs_zip" > "$job_logs_file" 2>/dev/null && [[ -s "$job_logs_file" ]]; then
+                {
+                  printf '=== %s ===\n' "$job_name"
+                  cat "$job_logs_file"
+                  printf '\n'
+                } >> "$combined_logs_file"
+              fi
             fi
           done < <(printf '%s\n' "$jobs" | jq -r '[.id, .name] | @tsv')
 
-          if [[ -z "$combined_logs" ]]; then
+          if [[ ! -s "$combined_logs_file" ]]; then
             echo "test_details=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Save logs to file for parsing
-          echo "$combined_logs" > /tmp/ats-logs.txt
-
           # Parse logs with Python script to extract failed/flaky tests
-          test_details=$(python3 .github/scripts/parse-ats-results.py - < /tmp/ats-logs.txt 2>/dev/null || echo "")
+          test_details=$(python3 .github/scripts/parse-ats-results.py - < "$combined_logs_file" 2>/dev/null || echo "")
 
           if [[ -n "$test_details" ]]; then
             # Escape for output variable

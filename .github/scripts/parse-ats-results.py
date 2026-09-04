@@ -73,16 +73,18 @@ def format_slack_message(failed_tests: list, flaky_tests: list) -> Optional[str]
     return "\n".join(lines)
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: parse-ats-results.py <log_text>")
-        print("Reads Playwright test output from stdin or as argument")
-        sys.exit(1)
-    
-    # Read from stdin or from argument
-    if sys.argv[1] == '-':
-        log_text = sys.stdin.read()
+    # Read from argument or stdin
+    if len(sys.argv) >= 2:
+        if sys.argv[1] == '-':
+            log_text = sys.stdin.read()
+        else:
+            log_text = sys.argv[1]
     else:
-        log_text = sys.argv[1]
+        if sys.stdin.isatty():
+            print("Usage: parse-ats-results.py <log_text>")
+            print("Reads Playwright test output from stdin or as argument")
+            sys.exit(1)
+        log_text = sys.stdin.read()
     
     failed_tests, flaky_tests = parse_playwright_output(log_text)
     message = format_slack_message(failed_tests, flaky_tests)

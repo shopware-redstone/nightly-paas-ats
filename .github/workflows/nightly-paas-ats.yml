@@ -359,6 +359,7 @@ jobs:
     if: always() && (github.event_name != 'workflow_dispatch' || inputs.notify_slack)
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
 
     steps:
@@ -384,9 +385,7 @@ jobs:
           set -euo pipefail
 
           # Fetch all jobs from this workflow run (best-effort; do not fail Slack notification)
-          if ! jobs="$(gh api "/repos/${GH_REPO}/actions/runs/${RUN_ID}/jobs" --jq '.jobs[] | select(.name | contains("ATS Platform")) | {id, name}' 2>/dev/null)"; then
-            jobs=""
-          fi
+          jobs="$(gh api "/repos/${GH_REPO}/actions/runs/${RUN_ID}/jobs" --jq '.jobs[] | select(.name | contains("ATS Platform")) | {id, name}' 2>/dev/null || true)"
 
           if [[ -z "$jobs" ]]; then
             echo "test_details=" >> "$GITHUB_OUTPUT"

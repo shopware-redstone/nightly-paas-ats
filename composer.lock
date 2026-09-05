@@ -2669,16 +2669,16 @@
         },
         {
             "name": "jms/serializer",
-            "version": "3.32.8",
+            "version": "3.32.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/serializer.git",
-                "reference": "74cb5e8930df5864609eaf08e05fd3b93a1f88f4"
+                "reference": "25cf987fa31d5f412feaae29745a5421cb803773"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/74cb5e8930df5864609eaf08e05fd3b93a1f88f4",
-                "reference": "74cb5e8930df5864609eaf08e05fd3b93a1f88f4",
+                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/25cf987fa31d5f412feaae29745a5421cb803773",
+                "reference": "25cf987fa31d5f412feaae29745a5421cb803773",
                 "shasum": ""
             },
             "require": {
@@ -2755,7 +2755,7 @@
             ],
             "support": {
                 "issues": "https://github.com/schmittjoh/serializer/issues",
-                "source": "https://github.com/schmittjoh/serializer/tree/3.32.8"
+                "source": "https://github.com/schmittjoh/serializer/tree/3.32.9"
             },
             "funding": [
                 {
@@ -2767,20 +2767,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-31T22:35:14+00:00"
+            "time": "2026-09-04T14:41:03+00:00"
         },
         {
             "name": "justinrainbow/json-schema",
-            "version": "6.11.0",
+            "version": "6.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jsonrainbow/json-schema.git",
-                "reference": "7e420a943a6fbc95e60e3cf67acfbee85b3b4da7"
+                "reference": "8ef236a1a37df364b518b7411a4b5bb95b040d79"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jsonrainbow/json-schema/zipball/7e420a943a6fbc95e60e3cf67acfbee85b3b4da7",
-                "reference": "7e420a943a6fbc95e60e3cf67acfbee85b3b4da7",
+                "url": "https://api.github.com/repos/jsonrainbow/json-schema/zipball/8ef236a1a37df364b518b7411a4b5bb95b040d79",
+                "reference": "8ef236a1a37df364b518b7411a4b5bb95b040d79",
                 "shasum": ""
             },
             "require": {
@@ -2830,9 +2830,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jsonrainbow/json-schema/issues",
-                "source": "https://github.com/jsonrainbow/json-schema/tree/6.11.0"
+                "source": "https://github.com/jsonrainbow/json-schema/tree/6.12.0"
             },
-            "time": "2026-08-21T10:30:42+00:00"
+            "time": "2026-09-04T12:54:20+00:00"
         },
         {
             "name": "laminas/laminas-code",
@@ -7172,12 +7172,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "e4b3a68178e96d429a77be23ae58da64a2b8658f"
+                "reference": "2bf15434a9df102048bafd136bf48e3b2892d5c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/e4b3a68178e96d429a77be23ae58da64a2b8658f",
-                "reference": "e4b3a68178e96d429a77be23ae58da64a2b8658f",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/2bf15434a9df102048bafd136bf48e3b2892d5c6",
+                "reference": "2bf15434a9df102048bafd136bf48e3b2892d5c6",
                 "shasum": ""
             },
             "require": {
@@ -7410,7 +7410,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-09-03T21:20:32+00:00"
+            "time": "2026-09-04T15:53:37+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

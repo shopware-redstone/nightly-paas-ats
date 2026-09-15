@@ -450,7 +450,10 @@ jobs:
           echo "::endgroup::"
           echo "::group::Parsing test results"
           
-          test_details=$(python3 .github/scripts/parse-ats-results.py "$combined_logs_file" 2>&1 || echo "")
+          if ! test_details="$(python3 .github/scripts/parse-ats-results.py "$combined_logs_file")"; then
+            echo "::warning::Failed to parse ATS logs"
+            test_details=""
+          fi
           
           if [[ -n "$test_details" ]]; then
             echo "Found test failures/flakies:"

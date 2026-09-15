@@ -25,15 +25,11 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
-        with:
-          # Use a PAT so the generated PR can trigger downstream workflows.
-          # Fall back to the default GITHUB_TOKEN if no PAT is configured.
-          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Check latest sw-paas release
         id: sw_paas
         env:
-          GH_TOKEN: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -109,7 +105,7 @@ jobs:
       - name: Open update pull request
         if: steps.sw_paas.outputs.update_needed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LATEST_VERSION: ${{ steps.sw_paas.outputs.latest_version }}
           LATEST_SHA256: ${{ steps.sw_paas.outputs.latest_sha256 }}
           ASSET_URL: ${{ steps.sw_paas.outputs.asset_url }}
@@ -169,13 +165,47 @@ jobs:
               --assignee "$PR_ASSIGNEE"
           fi
 
-          # --auto requires the repo's "Allow auto-merge" setting to be on; when it's off
-          # (as it is here today) gh pr merge --auto fails outright even though an
-          # immediate merge would succeed. Try --auto first so this keeps working if that
-          # setting is ever enabled, then fall back to a plain merge instead of failing
-          # the job every week. The head branch is deleted automatically by the repo's
-          # "Automatically delete head branches" setting, so --delete-branch isn't needed.
-          if ! gh pr merge "$branch" --repo "$GITHUB_REPOSITORY" --squash --auto; then
-            echo "::notice title=Auto-merge unavailable::'Allow auto-merge' is disabled for this repository (or the PR can't be queued for it); merging immediately instead."
-            gh pr merge "$branch" --repo "$GITHUB_REPOSITORY" --squash
-          fi
+      - name: Notify Slack
+        if: steps.sw_paas.outputs.update_needed == 'true'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          LATEST_VERSION: ${{ steps.sw_paas.outputs.latest_version }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d @- <<EOF
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🚀 PaaS CLI Update Available",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Version:*\n\`${LATEST_VERSION}\`"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Status:*\nPR Created"
+                  }
+                ]
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "<${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/pulls|View PR on GitHub>"
+                }
+              }
+            ]
+          }
+          EOF

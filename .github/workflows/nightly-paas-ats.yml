@@ -388,7 +388,13 @@ jobs:
           
           # Fetch all jobs from this workflow run
           echo "Fetching jobs list from run ${RUN_ID}..."
-          jobs="$(gh api "/repos/${GH_REPO}/actions/runs/${RUN_ID}/jobs" --jq '.jobs[] | select(.name | contains("ATS Platform")) | {id, name}' 2>&1 || true)"
+          if ! jobs="$(gh api "/repos/${GH_REPO}/actions/runs/${RUN_ID}/jobs" --jq '.jobs[] | select(.name | contains("ATS Platform")) | {id, name}' 2>&1)"; then
+            echo "::warning::Failed to fetch ATS Platform jobs for run ${RUN_ID}"
+            echo "$jobs"
+            echo "test_details=" >> "$GITHUB_OUTPUT"
+            echo "::endgroup::"
+            exit 0
+          fi
           
           if [[ -z "$jobs" ]]; then
             echo "::warning::No ATS Platform jobs found in run ${RUN_ID}"

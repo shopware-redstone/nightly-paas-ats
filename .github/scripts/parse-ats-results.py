@@ -25,12 +25,15 @@ def parse_playwright_output(log_text: str) -> tuple:
     lines = log_text.splitlines()
     current_section = None
     
-    for line in lines:
+    for i, line in enumerate(lines):
         # Look for section headers like "  3 failed" or "  2 flaky"
-        if re.search(r'^\s+\d+\s+failed', line):
+        failed_match = re.search(r'^\s+(\d+)\s+failed', line)
+        flaky_match = re.search(r'^\s+(\d+)\s+flaky', line)
+        
+        if failed_match:
             current_section = 'failed'
             continue
-        elif re.search(r'^\s+\d+\s+flaky', line):
+        elif flaky_match:
             current_section = 'flaky'
             continue
         elif re.search(r'^\s+\d+\s+(skipped|passed)', line):
@@ -38,14 +41,14 @@ def parse_playwright_output(log_text: str) -> tuple:
             continue
         
         # Parse test entries (indented lines with test paths)
-        if current_section and line.startswith('    '):
+        # Match lines that start with more indentation and contain test info
+        if current_section and line.startswith('    ['):
             test_entry = line.strip()
-            if test_entry.startswith('[Platform]'):
-                # Format: [Platform] › tests/path.spec.ts:line › Test name › Additional info
-                if current_section == 'failed':
-                    failed_tests.append(test_entry)
-                elif current_section == 'flaky':
-                    flaky_tests.append(test_entry)
+            # Format: [Platform] › tests/path.spec.ts:line › Test name › Additional info
+            if current_section == 'failed':
+                failed_tests.append(test_entry)
+            elif current_section == 'flaky':
+                flaky_tests.append(test_entry)
     
     return failed_tests, flaky_tests
 
@@ -61,6 +64,7 @@ def format_slack_message(failed_tests: list, flaky_tests: list) -> Optional[str]
     if failed_tests:
         lines.append(f"*❌ Failed Tests ({len(failed_tests)}):*")
         for test in failed_tests:
+            # Format nicely: extract the file and test name
             lines.append(f"  • {test}")
         lines.append("")
     
@@ -78,19 +82,26 @@ def main():
         if sys.argv[1] == '-':
             log_text = sys.stdin.read()
         else:
-            log_text = sys.argv[1]
+            with open(sys.argv[1], 'r') as f:
+                log_text = f.read()
     else:
-        if sys.stdin.isatty():
-            print("Usage: parse-ats-results.py <log_text>")
-            print("Reads Playwright test output from stdin or as argument")
+        if not sys.stdin.isatty():
+            log_text = sys.stdin.read()
+        else:
+            print("Usage: parse-ats-results.py <log_file_or_->")
+            print("Reads Playwright test output from file, stdin (when arg is '-'), or stdin (no args)")
             sys.exit(1)
-        log_text = sys.stdin.read()
+    
+    if not log_text.strip():
+        sys.exit(0)
     
     failed_tests, flaky_tests = parse_playwright_output(log_text)
     message = format_slack_message(failed_tests, flaky_tests)
     
     if message:
         print(message)
+    
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

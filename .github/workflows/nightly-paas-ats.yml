@@ -413,7 +413,7 @@ jobs:
           success_count=0
           
           while IFS=$'\t' read -r job_id job_name; do
-            ((job_count++))
+            ((++job_count))
             echo "Fetching logs for job ${job_count}: $job_name (ID: $job_id)"
             logs_zip="${RUNNER_TEMP}/job-${job_id}-logs.zip"
             job_logs_file="${RUNNER_TEMP}/job-${job_id}-logs.txt"

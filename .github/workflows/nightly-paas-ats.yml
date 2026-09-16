@@ -131,6 +131,12 @@ jobs:
           git add composer.lock
           git commit -m "chore(${{ matrix.name }}): update composer.lock [skip ci]"
           target_ref="HEAD:${{ matrix.branch }}"
+          for extraheader_key in \
+            "http.https://github.com/.extraheader" \
+            "http.https://github.com/${GITHUB_REPOSITORY}.extraheader" \
+            "http.https://github.com/${GITHUB_REPOSITORY}/.extraheader"; do
+            git config --local --unset-all "$extraheader_key" || true
+          done
           askpass_script="${RUNNER_TEMP}/git-askpass.sh"
           token_file="${RUNNER_TEMP}/git-push-token"
           composer_update_token="${COMPOSER_UPDATE_TOKEN}"
@@ -149,7 +155,7 @@ jobs:
             local token="$1"
             printf '%s' "$token" > "$token_file"
             chmod 600 "$token_file"
-            if GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= -c http.https://github.com/.extraheader= push origin "$target_ref"; then
+            if GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= push origin "$target_ref"; then
               rm -f "$token_file"
             else
               rm -f "$token_file"

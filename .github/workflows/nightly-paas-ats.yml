@@ -57,9 +57,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch }}
-          # Use a PAT so the pushed commit can trigger downstream workflows.
-          # Fall back to the default GITHUB_TOKEN if no PAT is configured.
-          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Checkout workflow configuration
         uses: actions/checkout@v4
@@ -69,7 +67,7 @@ jobs:
           sparse-checkout: |
             .github/sw-paas-cli.env
           sparse-checkout-cone-mode: false
-          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Mark setup stage
         run: echo "DEPLOY_STAGE=Set up PHP" >> "$GITHUB_ENV"

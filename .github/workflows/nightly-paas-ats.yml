@@ -129,17 +129,35 @@ jobs:
           git add composer.lock
           git commit -m "chore(${{ matrix.name }}): update composer.lock [skip ci]"
           target_ref="HEAD:${{ matrix.branch }}"
-          repo_url="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          askpass_script="${RUNNER_TEMP}/git-askpass.sh"
+
+          cat > "$askpass_script" <<'EOF'
+          #!/usr/bin/env bash
+          case "$1" in
+            *Username*) echo "x-access-token" ;;
+            *Password*) echo "${GIT_PUSH_TOKEN}" ;;
+          esac
+          EOF
+          chmod 700 "$askpass_script"
+
+          git config --local --unset-all http.https://github.com/.extraheader || true
+
+          push_with_token() {
+            local token="$1"
+            GIT_PUSH_TOKEN="$token" \
+            GIT_TERMINAL_PROMPT=0 \
+            GIT_ASKPASS="$askpass_script" \
+            git -c credential.helper= push origin "$target_ref"
+          }
 
           if [[ -n "${COMPOSER_UPDATE_TOKEN:-}" ]]; then
-            pat_repo_url="https://x-access-token:${COMPOSER_UPDATE_TOKEN}@github.com/${{ github.repository }}.git"
-            if git push "$pat_repo_url" "$target_ref"; then
+            if push_with_token "$COMPOSER_UPDATE_TOKEN"; then
               exit 0
             fi
             echo "::warning::Push with COMPOSER_UPDATE_TOKEN failed; retrying with GITHUB_TOKEN."
           fi
 
-          git push "$repo_url" "$target_ref"
+          push_with_token "$GITHUB_TOKEN"
 
       - name: Record deployment decision
         env:

@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch }}
-          token: ${{ secrets.COMPOSER_UPDATE_TOKEN || github.token }}
+          token: ${{ github.token }}
 
       - name: Checkout workflow configuration
         uses: actions/checkout@v4

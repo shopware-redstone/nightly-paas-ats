@@ -58,6 +58,7 @@ jobs:
         with:
           ref: ${{ matrix.branch }}
           token: ${{ github.token }}
+          persist-credentials: false
 
       - name: Checkout workflow configuration
         uses: actions/checkout@v4
@@ -68,6 +69,7 @@ jobs:
             .github/sw-paas-cli.env
           sparse-checkout-cone-mode: false
           token: ${{ github.token }}
+          persist-credentials: false
 
       - name: Mark setup stage
         run: echo "DEPLOY_STAGE=Set up PHP" >> "$GITHUB_ENV"
@@ -145,7 +147,7 @@ jobs:
             GIT_PUSH_TOKEN="$token" \
             GIT_TERMINAL_PROMPT=0 \
             GIT_ASKPASS="$askpass_script" \
-            git -c credential.helper= -c http.https://github.com/.extraheader= push origin "$target_ref"
+            git -c credential.helper= push origin "$target_ref"
           }
 
           if [[ -n "${COMPOSER_UPDATE_TOKEN:-}" ]]; then

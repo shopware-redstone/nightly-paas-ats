@@ -120,6 +120,9 @@ jobs:
 
       - name: Commit and push updated composer.lock
         if: steps.changes.outputs.changed == 'true'
+        env:
+          COMPOSER_UPDATE_TOKEN: ${{ secrets.COMPOSER_UPDATE_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Commit and push composer.lock" >> "$GITHUB_ENV"
@@ -130,8 +133,8 @@ jobs:
           target_ref="HEAD:${{ matrix.branch }}"
           askpass_script="${RUNNER_TEMP}/git-askpass.sh"
           token_file="${RUNNER_TEMP}/git-push-token"
-          composer_update_token='${{ secrets.COMPOSER_UPDATE_TOKEN }}'
-          github_token='${{ github.token }}'
+          composer_update_token="${COMPOSER_UPDATE_TOKEN}"
+          github_token="${GITHUB_TOKEN}"
 
           cat > "$askpass_script" <<EOF
           #!/usr/bin/env bash

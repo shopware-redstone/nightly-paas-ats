@@ -58,6 +58,7 @@ jobs:
         with:
           ref: ${{ matrix.branch }}
           token: ${{ github.token }}
+          persist-credentials: false
 
       - name: Checkout workflow configuration
         uses: actions/checkout@v4

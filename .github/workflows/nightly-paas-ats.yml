@@ -164,7 +164,9 @@ jobs:
           }
 
           if [[ -n "${composer_update_token:-}" ]]; then
-            push_with_token "$composer_update_token"
+            if ! push_with_token "$composer_update_token"; then
+              push_with_token "$github_token"
+            fi
           else
             push_with_token "$github_token"
           fi

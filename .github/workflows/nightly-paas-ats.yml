@@ -138,7 +138,6 @@ jobs:
             git config --local --unset-all "$extraheader_key" || true
           done
           askpass_script="${RUNNER_TEMP}/git-askpass.sh"
-          token_file="${RUNNER_TEMP}/git-push-token"
           composer_update_token="${COMPOSER_UPDATE_TOKEN}"
           github_token="${GITHUB_TOKEN}"
 
@@ -146,7 +145,7 @@ jobs:
           #!/usr/bin/env bash
           case "\$1" in
             *Username*) echo "x-access-token" ;;
-            *Password*) cat "$token_file" ;;
+            *Password*) echo "\${GIT_PUSH_TOKEN}" ;;
           esac
           EOF
           chmod 700 "$askpass_script"
@@ -155,16 +154,12 @@ jobs:
             local token="$1"
             local push_output
             local push_status
-            printf '%s' "$token" > "$token_file"
-            chmod 600 "$token_file"
-            if push_output="$(GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= -c credential.interactive=false push origin "$target_ref" 2>&1)"; then
+            if push_output="$(GIT_PUSH_TOKEN="$token" GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= -c credential.interactive=false push origin "$target_ref" 2>&1)"; then
               printf '%s\n' "$push_output"
-              rm -f "$token_file"
             else
               push_status=$?
               printf '%s\n' "$push_output" >&2
-              rm -f "$token_file"
-              if grep -Eqi 'authentication failed|could not read username|invalid username or password|http basic: access denied|permission to .+ denied to github-actions\[bot\]' <<<"$push_output"; then
+              if grep -Eqi 'authentication failed|could not read username|invalid username or password|http basic: access denied|permission to .+ denied|repository not found|403' <<<"$push_output"; then
                 return 2
               fi
               return "$push_status"

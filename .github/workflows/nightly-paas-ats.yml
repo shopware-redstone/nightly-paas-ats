@@ -426,7 +426,7 @@ jobs:
                   cat "$job_logs_file"
                   printf '\n'
                 } >> "$combined_logs_file"
-                ((success_count))
+                ((++success_count))
               else
                 echo "  ⚠ Failed to extract or logs are empty"
               fi

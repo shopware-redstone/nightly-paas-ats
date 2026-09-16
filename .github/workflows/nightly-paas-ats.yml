@@ -149,7 +149,7 @@ jobs:
             local token="$1"
             printf '%s' "$token" > "$token_file"
             chmod 600 "$token_file"
-            if GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= push origin "$target_ref"; then
+            if GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= -c http.https://github.com/.extraheader= push origin "$target_ref"; then
               rm -f "$token_file"
             else
               rm -f "$token_file"

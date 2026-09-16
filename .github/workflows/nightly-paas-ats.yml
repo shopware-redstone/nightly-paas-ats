@@ -150,16 +150,9 @@ jobs:
             git -c credential.helper= push origin "$target_ref"
           }
 
-          pushed_with_pat=false
           if [[ -n "${COMPOSER_UPDATE_TOKEN:-}" ]]; then
-            if push_with_token "$COMPOSER_UPDATE_TOKEN"; then
-              pushed_with_pat=true
-            else
-              echo "::warning::Push with COMPOSER_UPDATE_TOKEN failed; retrying with GITHUB_TOKEN."
-            fi
-          fi
-
-          if [[ "$pushed_with_pat" != "true" ]]; then
+            push_with_token "$COMPOSER_UPDATE_TOKEN"
+          else
             push_with_token "$GITHUB_TOKEN"
           fi
 

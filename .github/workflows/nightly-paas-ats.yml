@@ -150,14 +150,18 @@ jobs:
             git -c credential.helper= push origin "$target_ref"
           }
 
+          pushed_with_pat=false
           if [[ -n "${COMPOSER_UPDATE_TOKEN:-}" ]]; then
             if push_with_token "$COMPOSER_UPDATE_TOKEN"; then
-              exit 0
+              pushed_with_pat=true
+            else
+              echo "::warning::Push with COMPOSER_UPDATE_TOKEN failed; retrying with GITHUB_TOKEN."
             fi
-            echo "::warning::Push with COMPOSER_UPDATE_TOKEN failed; retrying with GITHUB_TOKEN."
           fi
 
-          push_with_token "$GITHUB_TOKEN"
+          if [[ "$pushed_with_pat" != "true" ]]; then
+            push_with_token "$GITHUB_TOKEN"
+          fi
 
       - name: Record deployment decision
         env:

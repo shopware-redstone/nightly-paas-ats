@@ -119,6 +119,9 @@ jobs:
 
       - name: Commit and push updated composer.lock
         if: steps.changes.outputs.changed == 'true'
+        env:
+          COMPOSER_UPDATE_TOKEN: ${{ secrets.COMPOSER_UPDATE_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Commit and push composer.lock" >> "$GITHUB_ENV"
@@ -127,7 +130,37 @@ jobs:
           git add composer.lock
           git commit -m "chore(${{ matrix.name }}): update composer.lock [skip ci]"
           target_ref="HEAD:${{ matrix.branch }}"
-          git push origin "$target_ref"
+          askpass_script="${RUNNER_TEMP}/git-askpass.sh"
+          token_file="${RUNNER_TEMP}/git-push-token"
+          composer_update_token="${COMPOSER_UPDATE_TOKEN}"
+          github_token="${GITHUB_TOKEN}"
+
+          cat > "$askpass_script" <<EOF
+          #!/usr/bin/env bash
+          case "\$1" in
+            *Username*) echo "x-access-token" ;;
+            *Password*) cat "$token_file" ;;
+          esac
+          EOF
+          chmod 700 "$askpass_script"
+
+          push_with_token() {
+            local token="$1"
+            printf '%s' "$token" > "$token_file"
+            chmod 600 "$token_file"
+            if GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= push origin "$target_ref"; then
+              rm -f "$token_file"
+            else
+              rm -f "$token_file"
+              return 1
+            fi
+          }
+
+          if [[ -n "${composer_update_token:-}" ]]; then
+            push_with_token "$composer_update_token"
+          else
+            push_with_token "$github_token"
+          fi
 
       - name: Record deployment decision
         env:

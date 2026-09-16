@@ -153,19 +153,31 @@ jobs:
 
           push_with_token() {
             local token="$1"
+            local push_output
+            local push_status
             printf '%s' "$token" > "$token_file"
             chmod 600 "$token_file"
-            if GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= -c credential.interactive=false push origin "$target_ref"; then
+            if push_output="$(GIT_TERMINAL_PROMPT=0 GIT_ASKPASS="$askpass_script" git -c credential.helper= -c credential.interactive=false push origin "$target_ref" 2>&1)"; then
+              printf '%s\n' "$push_output"
               rm -f "$token_file"
             else
+              push_status=$?
+              printf '%s\n' "$push_output" >&2
               rm -f "$token_file"
-              return 1
+              if grep -Eqi 'authentication failed|could not read username|repository not found|access denied|http basic: access denied|403|401' <<<"$push_output"; then
+                return 2
+              fi
+              return "$push_status"
             fi
           }
 
           if [[ -n "${composer_update_token:-}" ]]; then
-            if ! push_with_token "$composer_update_token"; then
+            pat_status=0
+            push_with_token "$composer_update_token" || pat_status=$?
+            if [[ "$pat_status" -eq 2 ]]; then
               push_with_token "$github_token"
+            elif [[ "$pat_status" -ne 0 ]]; then
+              exit "$pat_status"
             fi
           else
             push_with_token "$github_token"

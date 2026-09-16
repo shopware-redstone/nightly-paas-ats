@@ -135,6 +135,7 @@ jobs:
           token_file="${RUNNER_TEMP}/git-push-token"
           composer_update_token="${COMPOSER_UPDATE_TOKEN}"
           github_token="${GITHUB_TOKEN}"
+          git remote set-url origin "https://github.com/${{ github.repository }}.git"
 
           cat > "$askpass_script" <<EOF
           #!/usr/bin/env bash

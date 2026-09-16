@@ -118,13 +118,28 @@ jobs:
 
       - name: Commit and push updated composer.lock
         if: steps.changes.outputs.changed == 'true'
+        env:
+          COMPOSER_UPDATE_TOKEN: ${{ secrets.COMPOSER_UPDATE_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           echo "DEPLOY_STAGE=Commit and push composer.lock" >> "$GITHUB_ENV"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add composer.lock
           git commit -m "chore(${{ matrix.name }}): update composer.lock [skip ci]"
-          git push origin "HEAD:${{ matrix.branch }}"
+          target_ref="HEAD:${{ matrix.branch }}"
+          repo_url="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+
+          if [[ -n "${COMPOSER_UPDATE_TOKEN:-}" ]]; then
+            pat_repo_url="https://x-access-token:${COMPOSER_UPDATE_TOKEN}@github.com/${{ github.repository }}.git"
+            if git push "$pat_repo_url" "$target_ref"; then
+              exit 0
+            fi
+            echo "::warning::Push with COMPOSER_UPDATE_TOKEN failed; retrying with GITHUB_TOKEN."
+          fi
+
+          git push "$repo_url" "$target_ref"
 
       - name: Record deployment decision
         env:

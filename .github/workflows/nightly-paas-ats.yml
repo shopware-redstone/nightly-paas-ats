@@ -136,8 +136,7 @@ jobs:
           composer_update_token="${COMPOSER_UPDATE_TOKEN}"
           github_token="${GITHUB_TOKEN}"
           origin_url="$(git remote get-url origin)"
-          origin_url="https://${origin_url#https://}"
-          origin_url="https://${origin_url#*@}"
+          origin_url="$(printf '%s' "$origin_url" | sed -E 's#^https://[^@]+@#https://#')"
           git remote set-url origin "$origin_url"
 
           cat > "$askpass_script" <<EOF

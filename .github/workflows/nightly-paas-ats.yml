@@ -164,7 +164,7 @@ jobs:
               push_status=$?
               printf '%s\n' "$push_output" >&2
               rm -f "$token_file"
-              if grep -Eqi 'authentication failed|could not read username|repository not found|access denied|http basic: access denied|403|401' <<<"$push_output"; then
+              if grep -Eqi 'authentication failed|could not read username|invalid username or password|http basic: access denied' <<<"$push_output"; then
                 return 2
               fi
               return "$push_status"

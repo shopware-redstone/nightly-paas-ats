@@ -140,14 +140,12 @@ jobs:
           EOF
           chmod 700 "$askpass_script"
 
-          git config --local --unset-all http.https://github.com/.extraheader || true
-
           push_with_token() {
             local token="$1"
             GIT_PUSH_TOKEN="$token" \
             GIT_TERMINAL_PROMPT=0 \
             GIT_ASKPASS="$askpass_script" \
-            git -c credential.helper= push origin "$target_ref"
+            git -c credential.helper= -c http.https://github.com/.extraheader= push origin "$target_ref"
           }
 
           if [[ -n "${COMPOSER_UPDATE_TOKEN:-}" ]]; then

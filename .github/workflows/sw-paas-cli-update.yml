@@ -102,7 +102,7 @@ jobs:
         id: open_pr
         if: steps.sw_paas.outputs.update_needed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAAS_CLI_UPDATE_TOKEN }}
           LATEST_VERSION: ${{ steps.sw_paas.outputs.latest_version }}
           LATEST_SHA256: ${{ steps.sw_paas.outputs.latest_sha256 }}
           ASSET_URL: ${{ steps.sw_paas.outputs.asset_url }}

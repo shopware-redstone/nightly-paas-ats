@@ -178,7 +178,7 @@ jobs:
           fi
 
           echo "PR URL: $pr_url"
-          pr_number=$(echo "$pr_url" | grep -oE '[0-9]+$')
+          pr_number=$(echo "$pr_url" | grep -oE '[0-9]+$' || true)
 
           if [[ -z "$pr_number" ]]; then
             echo "::error::Could not extract PR number from URL: $pr_url"

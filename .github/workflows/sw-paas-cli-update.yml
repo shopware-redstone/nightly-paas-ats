@@ -69,8 +69,29 @@ jobs:
             puts asset.fetch("browser_download_url")
           ' "$release_json")"
 
-          curl -fsSL "$asset_url" -o "$archive"
-          latest_sha256="$(sha256sum "$archive" | cut -d " " -f 1)"
+          # Extract SHA256 from release body metadata
+          latest_sha256="$(ruby -rjson -e '
+            release = JSON.parse(File.read(ARGV[0]))
+            body = release.fetch("body", "")
+
+            # Try to find sha256 in formats: "sha256:xxxxx" or "sha256 xxxxx"
+            if match = body.match(/sha256[:\s]+([a-f0-9]{64})/i)
+              puts match[1]
+              exit 0
+            end
+
+            # Try reverse format: "xxxxx sha256" or "xxxxx:sha256"
+            if match = body.match(/([a-f0-9]{64})[:\s]*sha256/i)
+              puts match[1]
+              exit 0
+            end
+
+            abort "Could not find SHA256 checksum in release body"
+          ' "$release_json")" || {
+            echo "::warning::SHA256 not found in release body, will download and calculate"
+            curl -fsSL "$asset_url" -o "$archive"
+            latest_sha256="$(sha256sum "$archive" | cut -d " " -f 1)"
+          }
 
           LATEST_VERSION="$latest_version" LATEST_SHA256="$latest_sha256" ruby <<'RUBY'
             path = ".github/sw-paas-cli.env"
@@ -166,7 +187,7 @@ jobs:
             }
 
             # Extract URL from response or use gh pr view to get it
-            if [[ "$pr_response" =~ ^https://[^[:space:]]+$ ]]; then
+            if echo "$pr_response" | grep -q "^https://"; then
               pr_url="$pr_response"
             else
               # Fallback: query the PR we just created
@@ -178,7 +199,7 @@ jobs:
           fi
 
           echo "PR URL: $pr_url"
-          pr_number=$(echo "$pr_url" | grep -oE '[0-9]+$' || true)
+          pr_number=$(echo "$pr_url" | grep -oE '[0-9]+$')
 
           if [[ -z "$pr_number" ]]; then
             echo "::error::Could not extract PR number from URL: $pr_url"

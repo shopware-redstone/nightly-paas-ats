@@ -338,7 +338,7 @@ jobs:
 
       - name: Run ATS Platform suite
         working-directory: shopware/tests/acceptance
-        run: npx playwright test --workers=1 --project=Platform --shard=${{ matrix.shard }}/${{ matrix.total_shards }}
+        run: npx playwright test --workers=1 --project=Platform --shard=${{ matrix.shard }}/${{ matrix.total_shards }} --reporter=json --reporter=html
 
       - name: Upload Playwright artifacts
         if: always()
@@ -375,99 +375,46 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Fetch and parse ATS job logs
+      - name: Download ATS artifacts and parse results
         id: parse_logs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-          RUN_ID: ${{ github.run_id }}
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          path: ats-artifacts
+          pattern: ats-platform-*
+      
+      - name: Parse ATS test results
+        id: parse_results
         run: |
           set -euo pipefail
           
-          echo "::group::Fetching ATS job logs"
-          
-          # Fetch all jobs from this workflow run
-          echo "Fetching jobs list from run ${RUN_ID}..."
-          if ! jobs="$(gh api "/repos/${GH_REPO}/actions/runs/${RUN_ID}/jobs" --jq '.jobs[] | select(.name | contains("ATS Platform")) | {id, name}' 2>&1)"; then
-            echo "::warning::Failed to fetch ATS Platform jobs for run ${RUN_ID}"
-            echo "$jobs"
-            echo "test_details=" >> "$GITHUB_OUTPUT"
-            echo "::endgroup::"
-            exit 0
-          fi
-          
-          if [[ -z "$jobs" ]]; then
-            echo "::warning::No ATS Platform jobs found in run ${RUN_ID}"
-            echo "test_details=" >> "$GITHUB_OUTPUT"
-            echo "::endgroup::"
-            exit 0
-          fi
-          
-          echo "Found ATS Platform jobs:"
-          echo "$jobs" | jq -r '.name'
-          
-          # Collect logs from all ATS Platform shard jobs
-          combined_logs_file="${RUNNER_TEMP}/ats-logs.txt"
-          : > "$combined_logs_file"
-          job_count=0
-          success_count=0
-          
-          while IFS=$'\t' read -r job_id job_name; do
-            ((++job_count))
-            echo "Fetching logs for job ${job_count}: $job_name (ID: $job_id)"
-            logs_zip="${RUNNER_TEMP}/job-${job_id}-logs.zip"
-            job_logs_file="${RUNNER_TEMP}/job-${job_id}-logs.txt"
-            
-            if gh api "/repos/${GH_REPO}/actions/jobs/${job_id}/logs" > "$logs_zip" 2>&1; then
-              if unzip -p "$logs_zip" > "$job_logs_file" 2>&1 && [[ -s "$job_logs_file" ]]; then
-                echo "  ✓ Successfully extracted logs ($(wc -c < "$job_logs_file") bytes)"
-                {
-                  printf '=== %s ===\n' "$job_name"
-                  cat "$job_logs_file"
-                  printf '\n'
-                } >> "$combined_logs_file"
-                ((++success_count))
-              else
-                echo "  ⚠ Failed to extract or logs are empty"
-              fi
-            else
-              echo "  ✗ Failed to fetch logs from GitHub API"
+          # Find all artifact directories
+          artifact_dirs=()
+          for dir in ats-artifacts/ats-platform-*/; do
+            if [[ -d "$dir" ]]; then
+              artifact_dirs+=("$dir")
             fi
-          done < <(printf '%s\n' "$jobs" | jq -r '[.id, .name] | @tsv')
+          done
           
-          echo "Fetched ${success_count}/${job_count} ATS job logs"
-          
-          if [[ ! -s "$combined_logs_file" ]]; then
-            echo "::warning::No logs were successfully collected from ATS Platform jobs"
+          if [[ ${#artifact_dirs[@]} -eq 0 ]]; then
             echo "test_details=" >> "$GITHUB_OUTPUT"
-            echo "::endgroup::"
             exit 0
           fi
           
-          echo "Combined logs file size: $(wc -c < "$combined_logs_file") bytes"
-          
-          # Parse logs with Python script to extract failed/flaky tests
-          echo "::endgroup::"
-          echo "::group::Parsing test results"
-          
-          if ! test_details="$(python3 .github/scripts/parse-ats-results.py "$combined_logs_file")"; then
-            echo "::warning::Failed to parse ATS logs"
+          # Parse results with Python script
+          if ! test_details="$(python3 .github/scripts/parse-ats-results.py "${artifact_dirs[@]}")"; then
+            echo "::warning::Failed to parse ATS test results"
             test_details=""
           fi
           
           if [[ -n "$test_details" ]]; then
-            echo "Found test failures/flakies:"
-            echo "$test_details"
-            # Escape for output variable
             echo "test_details<<EOF" >> "$GITHUB_OUTPUT"
             echo "$test_details" >> "$GITHUB_OUTPUT"
             echo "EOF" >> "$GITHUB_OUTPUT"
           else
-            echo "No failed or flaky tests found in logs"
             echo "test_details=" >> "$GITHUB_OUTPUT"
           fi
-          
-          echo "::endgroup::"
+      
       - name: Notify Slack main status
         id: slack_main
         env:
@@ -623,10 +570,10 @@ jobs:
           echo "Slack main notification sent."
 
       - name: Post test details as separate message
-        if: always() && steps.parse_logs.outputs.test_details != ''
+        if: always() && steps.parse_results.outputs.test_details != ''
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          TEST_DETAILS: ${{ steps.parse_logs.outputs.test_details }}
+          TEST_DETAILS: ${{ steps.parse_results.outputs.test_details }}
         run: |
           set -euo pipefail
 

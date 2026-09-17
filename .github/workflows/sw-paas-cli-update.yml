@@ -25,7 +25,7 @@ jobs:
       - name: Check latest sw-paas release
         id: sw_paas
         env:
-          GH_TOKEN: ${{ secrets.PAAS_CLI_UPDATE_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAAS_CLI_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -69,6 +69,7 @@ jobs:
             puts asset.fetch("browser_download_url")
           ' "$release_json")"
 
+          # Download archive and calculate SHA256 (source of truth)
           curl -fsSL "$asset_url" -o "$archive"
           latest_sha256="$(sha256sum "$archive" | cut -d " " -f 1)"
 
@@ -102,7 +103,7 @@ jobs:
         id: open_pr
         if: steps.sw_paas.outputs.update_needed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.PAAS_CLI_UPDATE_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAAS_CLI_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
           LATEST_VERSION: ${{ steps.sw_paas.outputs.latest_version }}
           LATEST_SHA256: ${{ steps.sw_paas.outputs.latest_sha256 }}
           ASSET_URL: ${{ steps.sw_paas.outputs.asset_url }}
@@ -165,8 +166,8 @@ jobs:
               exit 1
             }
 
-            # Extract URL from response or use gh pr view to get it
-            if [[ "$pr_response" =~ ^https://[^[:space:]]+$ ]]; then
+            # Extract URL from response (must be exactly one line starting with https://)
+            if [[ $(echo "$pr_response" | wc -l) -eq 1 ]] && echo "$pr_response" | grep -q "^https://"; then
               pr_url="$pr_response"
             else
               # Fallback: query the PR we just created

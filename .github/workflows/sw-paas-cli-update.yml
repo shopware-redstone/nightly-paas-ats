@@ -25,7 +25,7 @@ jobs:
       - name: Check latest sw-paas release
         id: sw_paas
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAAS_CLI_UPDATE_TOKEN }}
         run: |
           set -euo pipefail
 

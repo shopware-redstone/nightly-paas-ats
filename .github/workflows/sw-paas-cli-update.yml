@@ -166,7 +166,7 @@ jobs:
             }
 
             # Extract URL from response or use gh pr view to get it
-            if echo "$pr_response" | grep -q "^https://"; then
+            if [[ "$pr_response" =~ ^https://[^[:space:]]+$ ]]; then
               pr_url="$pr_response"
             else
               # Fallback: query the PR we just created

@@ -2,10 +2,6 @@ name: Shopware PaaS CLI Update Check
 
 on:
   schedule:
-    # Run at midnight UTC, 2 hours before the 02:00 UTC nightly-paas-ats.yml
-    # run, so a merged CLI bump is on main before that workflow checks out and
-    # uses the pinned sw-paas CLI. The gap covers GitHub's own scheduling
-    # delay (see the note in nightly-paas-ats.yml) plus this check's runtime.
     - cron: "0 0 * * *"
   workflow_dispatch:
 
@@ -126,9 +122,6 @@ jobs:
           git diff --check
           git add .github/sw-paas-cli.env
           git commit -m "Update sw-paas CLI to ${LATEST_VERSION}"
-          # This branch is fully regenerated from main on every run, so it has no
-          # shared history with whatever the remote currently holds. Fetch the remote
-          # branch first so --force-with-lease has a baseline to compare against.
           git fetch origin "$branch":"refs/remotes/origin/$branch" >/dev/null 2>&1 || true
           git push --force-with-lease origin "$branch"
 
@@ -157,21 +150,41 @@ jobs:
             --jq '.[0].url' 2>/dev/null || echo "")
 
           if [[ -n "$existing_pr" ]]; then
-            # Reuse existing open PR
+            echo "Reusing existing open PR: $existing_pr"
             pr_url="$existing_pr"
           else
-            # Create new PR
-            pr_url=$(gh pr create \
+            echo "Creating new PR..."
+            pr_response=$(gh pr create \
               --repo "$GITHUB_REPOSITORY" \
               --base main \
               --head "$branch" \
               --title "$title" \
               --body-file "$body_file" \
-              --assignee "$PR_ASSIGNEE" \
-              --json url --jq '.url')
+              --assignee "$PR_ASSIGNEE" 2>&1) || {
+              echo "::error::Failed to create PR. Response: $pr_response"
+              exit 1
+            }
+
+            # Extract URL from response or use gh pr view to get it
+            if echo "$pr_response" | grep -q "^https://"; then
+              pr_url="$pr_response"
+            else
+              # Fallback: query the PR we just created
+              pr_url=$(gh pr view "$branch" \
+                --repo "$GITHUB_REPOSITORY" \
+                --json url \
+                --jq '.url')
+            fi
           fi
 
+          echo "PR URL: $pr_url"
           pr_number=$(echo "$pr_url" | grep -oE '[0-9]+$')
+
+          if [[ -z "$pr_number" ]]; then
+            echo "::error::Could not extract PR number from URL: $pr_url"
+            exit 1
+          fi
+
           echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
           echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
 

@@ -62,12 +62,7 @@ def normalize_test(spec: dict, file_path: str, line: str, test: dict) -> Optiona
     # Convert line to string if it's an int
     line = str(line) if line else ""
 
-    # Check for expected failures: Playwright marks tests with expectedStatus: failed
-    # These should not be reported as failures in Slack
-    expected_status = test.get("expectedStatus")
-    if expected_status == "failed":
-        # This is an expected failure, skip reporting it
-        return None
+    # Expected failures have aggregate status "expected" and are excluded from the Slack lists below.
 
     results = test.get("results") or []
     statuses = []

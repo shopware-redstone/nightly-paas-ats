@@ -13,16 +13,16 @@ def find_result_files(root: Path) -> list[Path]:
     """Return all discovered Playwright JSON report files under an artifact directory."""
     candidates = [
         root / "test-results" / "test-results.json",
-        root / "test-results.json",  # Issue #2: Handle root-level placement
+        root / "test-results.json",  # Handle root-level placement
         root / "shopware" / "tests" / "acceptance" / "test-results" / "test-results.json",
     ]
     return [candidate for candidate in candidates if candidate.exists()]
 
 
-def iter_specs(suite: dict, parent_file: str = ""):
-    """Yield (spec, file_path) tuples from nested JSON structure.
-    
-    Carries file path from parent suite through to specs, fixing Issue #3.
+def iter_specs(suite: dict, parent_file: str = "", parent_line: str = ""):
+    """Yield (spec, file_path, line) tuples from nested JSON structure.
+
+    Carries file path and line number from parent suite through to specs.
     """
     if not isinstance(suite, dict):
         return
@@ -31,31 +31,36 @@ def iter_specs(suite: dict, parent_file: str = ""):
     file_path = suite.get("file") or parent_file
     file_path = file_path if isinstance(file_path, str) else parent_file
 
+    # Use suite's line if available, otherwise inherit from parent
+    line = suite.get("line") or parent_line
+    line = line if isinstance(line, (str, int)) else parent_line
+
     # Process child suites recursively
     for child_suite in suite.get("suites") or []:
         if isinstance(child_suite, dict):
-            yield from iter_specs(child_suite, file_path)
+            yield from iter_specs(child_suite, file_path, line)
 
-    # Yield specs from this suite with inherited file path
+    # Yield specs from this suite with inherited file path and line
     for spec in suite.get("specs") or []:
         if isinstance(spec, dict):
-            yield spec, file_path
+            yield spec, file_path, line
 
 
-def normalize_test(spec: dict, file_path: str, test: dict) -> Optional[dict]:
+def normalize_test(spec: dict, file_path: str, line: str, test: dict) -> Optional[dict]:
     """Normalize a Playwright test entry to a common shape used by the Slack formatter.
-    
-    Fixes Issue #1 and #3: Use full identity (file, title, line) instead of just (title, location).
+
+    Uses full identity (file, title, line) from suite for accurate test deduplication.
     """
     if not isinstance(test, dict):
         return None
 
     title = spec.get("title") or "Unknown test"
-    line = spec.get("line", "")
-    
-    # Use the file path from parent suite (passed in), not from spec
-    # This fixes Issue #3: Playwright stores file on suite, not on spec
+
+    # Use the file path and line from parent suite (passed in), not from spec
+    # Playwright stores these on the suite object, not on individual specs
     location = file_path if isinstance(file_path, str) else ""
+    # Convert line to string if it's an int
+    line = str(line) if line else ""
 
     results = test.get("results") or []
     statuses = []
@@ -85,8 +90,7 @@ def normalize_test(spec: dict, file_path: str, test: dict) -> Optional[dict]:
     if normalized_status == "unknown" and not flaky:
         return None
 
-    # Issue #1: Use full identity (file:line:title) to prevent collapsing distinct tests
-    # This includes line number as fallback if needed
+    # Use full identity (file:line:title) to prevent collapsing distinct tests
     return {
         "title": title,
         "location": location,
@@ -113,13 +117,13 @@ def load_test_results(results_file: Path) -> list[dict]:
         if not isinstance(suite, dict):
             continue
 
-        for spec, file_path in iter_specs(suite):
+        for spec, file_path, line in iter_specs(suite):
             for test in spec.get("tests") or []:
-                normalized = normalize_test(spec, file_path, test)
+                normalized = normalize_test(spec, file_path, line, test)
                 if normalized is None:
                     continue
 
-                # Issue #1: Use full identity (file, title, line) for deduplication
+                # Use full identity (file, title, line) for deduplication
                 # This prevents collapsing tests with same title but different files/lines
                 key = normalized["identity"]
                 if key in seen:
@@ -131,7 +135,11 @@ def load_test_results(results_file: Path) -> list[dict]:
 
 
 def process_results(artifact_dirs: list) -> tuple:
-    """Process test results from all artifact directories and return failed and flaky tests."""
+    """Process test results from all artifact directories and return failed and flaky tests.
+
+    Applies cross-artifact de-duplication to prevent reporting the same test
+    (e.g., shared setup failures) from multiple shards.
+    """
     all_tests = []
 
     for artifact_dir in artifact_dirs:
@@ -142,10 +150,21 @@ def process_results(artifact_dirs: list) -> tuple:
         for test_results_file in find_result_files(artifact_dir):
             all_tests.extend(load_test_results(test_results_file))
 
-    failed_tests = [test for test in all_tests if test["status"] == "failed"]
-    flaky_tests = [test for test in all_tests if test["status"] == "flaky"]
+    # Apply cross-artifact de-duplication
+    # Tests may appear in multiple shards (e.g., setup failures), so deduplicate
+    # using the full identity tuple: (file, title, line)
+    seen = set()
+    deduplicated_tests = []
+    for test in all_tests:
+        key = test["identity"]
+        if key not in seen:
+            seen.add(key)
+            deduplicated_tests.append(test)
 
-    return failed_tests, flaky_tests, len(all_tests)
+    failed_tests = [test for test in deduplicated_tests if test["status"] == "failed"]
+    flaky_tests = [test for test in deduplicated_tests if test["status"] == "flaky"]
+
+    return failed_tests, flaky_tests, len(deduplicated_tests)
 
 
 def format_slack_message(failed_tests: list, flaky_tests: list) -> Optional[str]:

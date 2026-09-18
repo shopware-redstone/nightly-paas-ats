@@ -381,16 +381,32 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ats-artifacts
-          pattern: ats-platform-*
-      
-      
+          # Include run_id and run_attempt to avoid mixing artifacts from different run attempts
+          pattern: ats-platform-*-${{ github.run_id }}-${{ github.run_attempt }}
+
+
       - name: Check artifact download status
         id: check_download
         run: |
+          set -euo pipefail
+
+          expected_shards=2
+
           if [[ "${{ steps.download_artifacts.outcome }}" != "success" ]] ||
              [[ ! -d "ats-artifacts" ]] ||
              [[ -z "$(ls -A ats-artifacts 2>/dev/null)" ]]; then
             echo "::warning::No ATS artifacts found - test result details will be unavailable"
+            echo "download_failed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Count actual shard artifacts downloaded
+          actual_shards=$(find ats-artifacts -maxdepth 1 -type d -name "ats-platform-*" | wc -l)
+
+          # Verify all expected shards were downloaded
+          # If one shard fails before artifact upload, we'd only have partial results
+          if [[ $actual_shards -lt $expected_shards ]]; then
+            echo "::warning::Only $actual_shards of $expected_shards ATS shards downloaded - missing shard data will not be reported"
             echo "download_failed=true" >> "$GITHUB_OUTPUT"
           else
             echo "download_failed=false" >> "$GITHUB_OUTPUT"
@@ -401,7 +417,7 @@ jobs:
         if: steps.check_download.outputs.download_failed == 'false'
         run: |
           set -euo pipefail
-          
+
           # Find all artifact directories
           artifact_dirs=()
           for dir in ats-artifacts/ats-platform-*/; do
@@ -409,18 +425,18 @@ jobs:
               artifact_dirs+=("$dir")
             fi
           done
-          
+
           if [[ ${#artifact_dirs[@]} -eq 0 ]]; then
             echo "test_details=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          
+
           # Parse results with Python script
           if ! test_details="$(python3 .github/scripts/parse-ats-results.py "${artifact_dirs[@]}")"; then
             echo "::warning::Failed to parse ATS test results"
             test_details=""
           fi
-          
+
           if [[ -n "$test_details" ]]; then
             echo "test_details<<EOF" >> "$GITHUB_OUTPUT"
             echo "$test_details" >> "$GITHUB_OUTPUT"
@@ -428,7 +444,7 @@ jobs:
           else
             echo "test_details=" >> "$GITHUB_OUTPUT"
           fi
-      
+
       - name: Notify Slack main status
         id: slack_main
         env:
@@ -598,7 +614,7 @@ jobs:
           fi
 
           echo "Posting test details to Slack..."
-          
+
           # Post test details as a follow-up message
           payload="$(jq -n \
             --arg text "$TEST_DETAILS" \

@@ -156,9 +156,10 @@ def process_results(artifact_dirs: list) -> tuple:
         if not artifact_dir.exists():
             continue
 
-        for test_results_file in find_result_files(artifact_dir):
-            try:
-                all_tests.extend(load_test_results(test_results_file))
+        result_files = find_result_files(artifact_dir)
+        if not result_files:
+            raise FileNotFoundError(f"No test-results.json found in {artifact_dir}")
+        for test_results_file in result_files:
             except (json.JSONDecodeError, OSError) as exc:
                 # Re-raise so the workflow knows this shard's results are invalid
                 print(f"Error: Cannot process results from {artifact_dir}: {exc}", file=sys.stderr)

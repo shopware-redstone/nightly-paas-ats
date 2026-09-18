@@ -387,7 +387,9 @@ jobs:
       - name: Check artifact download status
         id: check_download
         run: |
-          if [[ ! -d "ats-artifacts" ]] || [[ -z "$(ls -A ats-artifacts 2>/dev/null)" ]]; then
+          if [[ "${{ steps.download_artifacts.outcome }}" != "success" ]] ||
+             [[ ! -d "ats-artifacts" ]] ||
+             [[ -z "$(ls -A ats-artifacts 2>/dev/null)" ]]; then
             echo "::warning::No ATS artifacts found - test result details will be unavailable"
             echo "download_failed=true" >> "$GITHUB_OUTPUT"
           else

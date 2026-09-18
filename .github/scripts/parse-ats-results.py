@@ -62,11 +62,19 @@ def normalize_test(spec: dict, file_path: str, line: str, test: dict) -> Optiona
     # Convert line to string if it's an int
     line = str(line) if line else ""
 
+    # Check for expected failures: Playwright marks tests with expectedStatus: failed
+    # These should not be reported as failures in Slack
+    expected_status = test.get("expectedStatus")
+    if expected_status == "failed":
+        # This is an expected failure, skip reporting it
+        return None
+
     results = test.get("results") or []
     statuses = []
     if isinstance(results, list):
         statuses = [result.get("status") for result in results if isinstance(result, dict)]
 
+    # Use aggregate test.status as the authoritative status
     status = test.get("status")
     if not status and statuses:
         status = statuses[-1]
@@ -102,13 +110,17 @@ def normalize_test(spec: dict, file_path: str, line: str, test: dict) -> Optiona
 
 
 def load_test_results(results_file: Path) -> list[dict]:
-    """Load a Playwright JSON report and flatten all test cases from the nested structure."""
+    """Load a Playwright JSON report and flatten all test cases from the nested structure.
+
+    Raises exceptions on parse failures to allow the workflow to detect incomplete results.
+    """
     try:
         with open(results_file, encoding="utf-8") as handle:
             payload = json.load(handle)
     except (json.JSONDecodeError, OSError) as exc:
-        print(f"Warning: Failed to load {results_file}: {exc}", file=sys.stderr)
-        return []
+        print(f"Error: Failed to load {results_file}: {exc}", file=sys.stderr)
+        # Propagate the error so the workflow knows the report is invalid
+        raise
 
     tests = []
     seen = set()
@@ -139,6 +151,8 @@ def process_results(artifact_dirs: list) -> tuple:
 
     Applies cross-artifact de-duplication to prevent reporting the same test
     (e.g., shared setup failures) from multiple shards.
+
+    Raises exceptions on parse failures so the workflow can detect incomplete results.
     """
     all_tests = []
 
@@ -148,7 +162,12 @@ def process_results(artifact_dirs: list) -> tuple:
             continue
 
         for test_results_file in find_result_files(artifact_dir):
-            all_tests.extend(load_test_results(test_results_file))
+            try:
+                all_tests.extend(load_test_results(test_results_file))
+            except (json.JSONDecodeError, OSError) as exc:
+                # Re-raise so the workflow knows this shard's results are invalid
+                print(f"Error: Cannot process results from {artifact_dir}: {exc}", file=sys.stderr)
+                raise
 
     # Apply cross-artifact de-duplication
     # Tests may appear in multiple shards (e.g., setup failures), so deduplicate
@@ -203,7 +222,12 @@ def main():
         sys.exit(1)
 
     artifact_dirs = sys.argv[1:]
-    failed_tests, flaky_tests, total_tests = process_results(artifact_dirs)
+    try:
+        failed_tests, flaky_tests, total_tests = process_results(artifact_dirs)
+    except (json.JSONDecodeError, OSError) as exc:
+        # Exit with error code so workflow knows results are incomplete
+        print(f"Error: Failed to parse ATS results: {exc}", file=sys.stderr)
+        sys.exit(1)
 
     message = format_slack_message(failed_tests, flaky_tests)
 

@@ -434,7 +434,7 @@ jobs:
           # Parse results with Python script
           if ! test_details="$(python3 .github/scripts/parse-ats-results.py "${artifact_dirs[@]}")"; then
             echo "::warning::Failed to parse ATS test results"
-            test_details=""
+            test_details="Test result details are unavailable because ATS artifacts could not be parsed."
           fi
 
           if [[ -n "$test_details" ]]; then

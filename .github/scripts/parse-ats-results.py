@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Parse Playwright test results from test-results.json artifacts and extract failed/flaky tests.
+Parse Playwright JSON results from artifacts and extract failed/flaky tests.
 """
 
 import json
@@ -8,95 +8,166 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-def load_test_results(results_file: Path) -> dict:
-    """Load test results from test-results.json"""
-    if not results_file.exists():
-        return {"tests": []}
-    
-    try:
-        with open(results_file) as f:
-            return json.load(f)
-    except (json.JSONDecodeError, IOError) as e:
-        print(f"Warning: Failed to load {results_file}: {e}", file=sys.stderr)
-        return {"tests": []}
 
-def extract_test_info(test: dict) -> dict:
-    """Extract relevant test information"""
+def find_result_files(root: Path) -> list[Path]:
+    """Return all discovered Playwright JSON report files under an artifact directory."""
+    candidates = [
+        root / "test-results" / "test-results.json",
+        root / "shopware" / "tests" / "acceptance" / "test-results" / "test-results.json",
+    ]
+    return [candidate for candidate in candidates if candidate.exists()]
+
+
+def iter_test_entries(node):
+    """Yield Playwright test entries from the nested JSON report structure."""
+    if isinstance(node, dict):
+        if "results" in node and isinstance(node.get("results"), list):
+            yield node
+
+        for key in ("suites", "specs", "tests"):
+            children = node.get(key)
+            if isinstance(children, list):
+                for child in children:
+                    yield from iter_test_entries(child)
+
+        for value in node.values():
+            if isinstance(value, (dict, list)):
+                yield from iter_test_entries(value)
+
+    elif isinstance(node, list):
+        for item in node:
+            yield from iter_test_entries(item)
+
+
+def normalize_test(test: dict) -> Optional[dict]:
+    """Normalize a Playwright test entry to a common shape used by the Slack formatter."""
+    if not isinstance(test, dict):
+        return None
+
+    title = test.get("title") or "Unknown test"
     location = test.get("location", "")
-    title = test.get("title", "Unknown test")
-    
+    if isinstance(location, dict):
+        location = location.get("file", "")
+    elif not isinstance(location, str):
+        location = ""
+
+    results = test.get("results") or []
+    statuses = []
+    if isinstance(results, list):
+        statuses = [result.get("status") for result in results if isinstance(result, dict)]
+
+    status = test.get("status")
+    if not status and statuses:
+        status = statuses[-1]
+
+    if status in {"failed", "timedOut", "unexpected", "interrupted"}:
+        normalized_status = "failed"
+    elif status == "flaky" or any(s == "flaky" for s in statuses):
+        normalized_status = "flaky"
+    elif status is None:
+        normalized_status = "unknown"
+    else:
+        normalized_status = str(status)
+
+    flaky = bool(test.get("flaky")) or any(
+        isinstance(result, dict) and bool(result.get("flaky"))
+        for result in results
+    )
+
+    if normalized_status == "unknown" and not flaky:
+        return None
+
     return {
         "title": title,
-        "location": location,
-        "status": test.get("status", "unknown"),
-        "flaky": test.get("flaky", False),
+        "location": str(location),
+        "status": normalized_status,
+        "flaky": flaky,
     }
 
+
+def load_test_results(results_file: Path) -> list[dict]:
+    """Load a Playwright JSON report and flatten all test cases from the nested structure."""
+    try:
+        with open(results_file, encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (json.JSONDecodeError, OSError) as exc:
+        print(f"Warning: Failed to load {results_file}: {exc}", file=sys.stderr)
+        return []
+
+    tests = []
+    seen = set()
+
+    for node in iter_test_entries(payload):
+        normalized = normalize_test(node)
+        if normalized is None:
+            continue
+
+        key = (normalized["title"], normalized["location"])
+        if key in seen:
+            continue
+        seen.add(key)
+        tests.append(normalized)
+
+    return tests
+
+
 def process_results(artifact_dirs: list) -> tuple:
-    """Process test results from all artifact directories and return failed and flaky tests"""
+    """Process test results from all artifact directories and return failed and flaky tests."""
     all_tests = []
-    
+
     for artifact_dir in artifact_dirs:
         artifact_dir = Path(artifact_dir)
         if not artifact_dir.exists():
             continue
-        
-        # Find test-results.json in the artifact directory
-        # Primary path: artifact_dir / "test-results" / "test-results.json"
-        test_results_file = artifact_dir / "test-results" / "test-results.json"
-        if not test_results_file.exists():
-            # Fallback path for alternate directory structure
-            test_results_file = artifact_dir / "shopware" / "tests" / "acceptance" / "test-results" / "test-results.json"
-        
-        if test_results_file.exists():
-            results = load_test_results(test_results_file)
-            for test in results.get("tests", []):
-                all_tests.append(extract_test_info(test))
-    
-    # Separate failed and flaky tests
-    failed_tests = [t for t in all_tests if t["status"] == "failed"]
-    flaky_tests = [t for t in all_tests if t["flaky"] and t["status"] != "failed"]
-    
+
+        for test_results_file in find_result_files(artifact_dir):
+            all_tests.extend(load_test_results(test_results_file))
+
+    failed_tests = [test for test in all_tests if test["status"] == "failed"]
+    flaky_tests = [test for test in all_tests if test["status"] == "flaky"]
+
     return failed_tests, flaky_tests, len(all_tests)
 
+
 def format_slack_message(failed_tests: list, flaky_tests: list) -> Optional[str]:
-    """Format test results for Slack message"""
+    """Format test results for Slack message."""
     if not failed_tests and not flaky_tests:
         return None
-    
-    lines = []
-    lines.append("*Test Results Details (from both shards):*")
-    lines.append("")
-    
+
+    lines = [
+        "*Test Results Details (from both shards):*",
+        "",
+    ]
+
     if failed_tests:
         lines.append(f"*❌ Failed Tests ({len(failed_tests)}):*")
         for test in failed_tests:
             location = test["location"].split(":")[0] if test["location"] else "unknown"
             lines.append(f"  • {location} › {test['title']}")
         lines.append("")
-    
+
     if flaky_tests:
         lines.append(f"*⚠️  Flaky Tests ({len(flaky_tests)}):*")
         for test in flaky_tests:
             location = test["location"].split(":")[0] if test["location"] else "unknown"
             lines.append(f"  • {location} › {test['title']}")
         lines.append("")
-    
+
     return "\n".join(lines)
+
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: parse-ats-results.py <artifact_dir1> [artifact_dir2] ...")
         sys.exit(1)
-    
+
     artifact_dirs = sys.argv[1:]
-    failed_tests, flaky_tests, total_tests = process_results(artifact_dirs)
-    
+    failed_tests, flaky_tests, _ = process_results(artifact_dirs)
     message = format_slack_message(failed_tests, flaky_tests)
-    
+
     if message:
         print(message)
-    # Exit silently when no tests are found - prevents spurious Slack messages on successful runs
+
 
 if __name__ == "__main__":
     main()

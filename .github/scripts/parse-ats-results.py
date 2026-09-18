@@ -13,34 +13,49 @@ def find_result_files(root: Path) -> list[Path]:
     """Return all discovered Playwright JSON report files under an artifact directory."""
     candidates = [
         root / "test-results" / "test-results.json",
+        root / "test-results.json",  # Issue #2: Handle root-level placement
         root / "shopware" / "tests" / "acceptance" / "test-results" / "test-results.json",
     ]
     return [candidate for candidate in candidates if candidate.exists()]
 
 
-def iter_specs(suite: dict):
-    """Yield Playwright spec entries from the nested JSON report structure."""
+def iter_specs(suite: dict, parent_file: str = ""):
+    """Yield (spec, file_path) tuples from nested JSON structure.
+    
+    Carries file path from parent suite through to specs, fixing Issue #3.
+    """
     if not isinstance(suite, dict):
         return
 
+    # Use suite's file if available, otherwise inherit from parent
+    file_path = suite.get("file") or parent_file
+    file_path = file_path if isinstance(file_path, str) else parent_file
+
+    # Process child suites recursively
     for child_suite in suite.get("suites") or []:
         if isinstance(child_suite, dict):
-            yield from iter_specs(child_suite)
+            yield from iter_specs(child_suite, file_path)
 
+    # Yield specs from this suite with inherited file path
     for spec in suite.get("specs") or []:
         if isinstance(spec, dict):
-            yield spec
+            yield spec, file_path
 
 
-def normalize_test(spec: dict, test: dict) -> Optional[dict]:
-    """Normalize a Playwright test entry to a common shape used by the Slack formatter."""
+def normalize_test(spec: dict, file_path: str, test: dict) -> Optional[dict]:
+    """Normalize a Playwright test entry to a common shape used by the Slack formatter.
+    
+    Fixes Issue #1 and #3: Use full identity (file, title, line) instead of just (title, location).
+    """
     if not isinstance(test, dict):
         return None
 
     title = spec.get("title") or "Unknown test"
-    location = spec.get("file", "")
-    if not isinstance(location, str):
-        location = ""
+    line = spec.get("line", "")
+    
+    # Use the file path from parent suite (passed in), not from spec
+    # This fixes Issue #3: Playwright stores file on suite, not on spec
+    location = file_path if isinstance(file_path, str) else ""
 
     results = test.get("results") or []
     statuses = []
@@ -70,11 +85,15 @@ def normalize_test(spec: dict, test: dict) -> Optional[dict]:
     if normalized_status == "unknown" and not flaky:
         return None
 
+    # Issue #1: Use full identity (file:line:title) to prevent collapsing distinct tests
+    # This includes line number as fallback if needed
     return {
         "title": title,
-        "location": str(location),
+        "location": location,
+        "line": line,
         "status": normalized_status,
         "flaky": flaky,
+        "identity": (location, title, line),  # Used for deduplication
     }
 
 
@@ -94,13 +113,15 @@ def load_test_results(results_file: Path) -> list[dict]:
         if not isinstance(suite, dict):
             continue
 
-        for spec in iter_specs(suite):
+        for spec, file_path in iter_specs(suite):
             for test in spec.get("tests") or []:
-                normalized = normalize_test(spec, test)
+                normalized = normalize_test(spec, file_path, test)
                 if normalized is None:
                     continue
 
-                key = (normalized["title"], normalized["location"])
+                # Issue #1: Use full identity (file, title, line) for deduplication
+                # This prevents collapsing tests with same title but different files/lines
+                key = normalized["identity"]
                 if key in seen:
                     continue
                 seen.add(key)
@@ -128,26 +149,29 @@ def process_results(artifact_dirs: list) -> tuple:
 
 
 def format_slack_message(failed_tests: list, flaky_tests: list) -> Optional[str]:
-    """Format test results for Slack message."""
+    """Format test results for Slack message"""
     if not failed_tests and not flaky_tests:
         return None
 
-    lines = [
-        "*Test Results Details (from both shards):*",
-        "",
-    ]
+    lines = []
+    lines.append("*Test Results Details (from both shards):*")
+    lines.append("")
 
     if failed_tests:
         lines.append(f"*❌ Failed Tests ({len(failed_tests)}):*")
         for test in failed_tests:
-            location = test["location"].split(":")[0] if test["location"] else "unknown"
+            location = test["location"] or "unknown"
+            if test.get("line"):
+                location = f"{location}:{test['line']}"
             lines.append(f"  • {location} › {test['title']}")
         lines.append("")
 
     if flaky_tests:
         lines.append(f"*⚠️  Flaky Tests ({len(flaky_tests)}):*")
         for test in flaky_tests:
-            location = test["location"].split(":")[0] if test["location"] else "unknown"
+            location = test["location"] or "unknown"
+            if test.get("line"):
+                location = f"{location}:{test['line']}"
             lines.append(f"  • {location} › {test['title']}")
         lines.append("")
 
@@ -160,11 +184,13 @@ def main():
         sys.exit(1)
 
     artifact_dirs = sys.argv[1:]
-    failed_tests, flaky_tests, _ = process_results(artifact_dirs)
+    failed_tests, flaky_tests, total_tests = process_results(artifact_dirs)
+
     message = format_slack_message(failed_tests, flaky_tests)
 
     if message:
         print(message)
+    # Exit silently when no tests are found - prevents spurious Slack messages on successful runs
 
 
 if __name__ == "__main__":

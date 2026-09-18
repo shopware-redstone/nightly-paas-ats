@@ -376,15 +376,27 @@ jobs:
           python-version: "3.11"
 
       - name: Download ATS artifacts and parse results
-        id: parse_logs
+        id: download_artifacts
         continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           path: ats-artifacts
           pattern: ats-platform-*
       
+      
+      - name: Check artifact download status
+        id: check_download
+        run: |
+          if [[ ! -d "ats-artifacts" ]] || [[ -z "$(ls -A ats-artifacts 2>/dev/null)" ]]; then
+            echo "::warning::No ATS artifacts found - test result details will be unavailable"
+            echo "download_failed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "download_failed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Parse ATS test results
         id: parse_results
+        if: steps.check_download.outputs.download_failed == 'false'
         run: |
           set -euo pipefail
           
@@ -570,10 +582,11 @@ jobs:
           echo "Slack main notification sent."
 
       - name: Post test details as separate message
-        if: always() && steps.parse_results.outputs.test_details != ''
+        if: always() && (steps.parse_results.outputs.test_details != '' || steps.check_download.outputs.download_failed == 'true')
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           TEST_DETAILS: ${{ steps.parse_results.outputs.test_details }}
+          DOWNLOAD_FAILED: ${{ steps.check_download.outputs.download_failed }}
         run: |
           set -euo pipefail
 

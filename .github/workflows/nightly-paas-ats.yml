@@ -587,7 +587,7 @@ jobs:
         if: always() && (steps.parse_results.outputs.test_details != '' || steps.check_download.outputs.download_failed == 'true')
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          TEST_DETAILS: ${{ steps.parse_results.outputs.test_details }}
+          TEST_DETAILS: ${{ steps.parse_results.outputs.test_details || (steps.check_download.outputs.download_failed == 'true' && 'Test result details are unavailable because ATS artifacts could not be downloaded.') }}
           DOWNLOAD_FAILED: ${{ steps.check_download.outputs.download_failed }}
         run: |
           set -euo pipefail

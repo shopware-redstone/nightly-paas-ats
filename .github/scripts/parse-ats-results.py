@@ -18,37 +18,28 @@ def find_result_files(root: Path) -> list[Path]:
     return [candidate for candidate in candidates if candidate.exists()]
 
 
-def iter_test_entries(node):
-    """Yield Playwright test entries from the nested JSON report structure."""
-    if isinstance(node, dict):
-        if "results" in node and isinstance(node.get("results"), list):
-            yield node
+def iter_specs(suite: dict):
+    """Yield Playwright spec entries from the nested JSON report structure."""
+    if not isinstance(suite, dict):
+        return
 
-        for key in ("suites", "specs", "tests"):
-            children = node.get(key)
-            if isinstance(children, list):
-                for child in children:
-                    yield from iter_test_entries(child)
+    for child_suite in suite.get("suites") or []:
+        if isinstance(child_suite, dict):
+            yield from iter_specs(child_suite)
 
-        for value in node.values():
-            if isinstance(value, (dict, list)):
-                yield from iter_test_entries(value)
-
-    elif isinstance(node, list):
-        for item in node:
-            yield from iter_test_entries(item)
+    for spec in suite.get("specs") or []:
+        if isinstance(spec, dict):
+            yield spec
 
 
-def normalize_test(test: dict) -> Optional[dict]:
+def normalize_test(spec: dict, test: dict) -> Optional[dict]:
     """Normalize a Playwright test entry to a common shape used by the Slack formatter."""
     if not isinstance(test, dict):
         return None
 
-    title = test.get("title") or "Unknown test"
-    location = test.get("location", "")
-    if isinstance(location, dict):
-        location = location.get("file", "")
-    elif not isinstance(location, str):
+    title = spec.get("title") or "Unknown test"
+    location = spec.get("file", "")
+    if not isinstance(location, str):
         location = ""
 
     results = test.get("results") or []
@@ -60,10 +51,12 @@ def normalize_test(test: dict) -> Optional[dict]:
     if not status and statuses:
         status = statuses[-1]
 
-    if status in {"failed", "timedOut", "unexpected", "interrupted"}:
-        normalized_status = "failed"
-    elif status == "flaky" or any(s == "flaky" for s in statuses):
+    if status == "flaky":
         normalized_status = "flaky"
+    elif status == "unexpected":
+        normalized_status = "failed"
+    elif any(s in {"failed", "timedOut", "interrupted"} for s in statuses):
+        normalized_status = "failed"
     elif status is None:
         normalized_status = "unknown"
     else:
@@ -97,16 +90,21 @@ def load_test_results(results_file: Path) -> list[dict]:
     tests = []
     seen = set()
 
-    for node in iter_test_entries(payload):
-        normalized = normalize_test(node)
-        if normalized is None:
+    for suite in payload.get("suites") or []:
+        if not isinstance(suite, dict):
             continue
 
-        key = (normalized["title"], normalized["location"])
-        if key in seen:
-            continue
-        seen.add(key)
-        tests.append(normalized)
+        for spec in iter_specs(suite):
+            for test in spec.get("tests") or []:
+                normalized = normalize_test(spec, test)
+                if normalized is None:
+                    continue
+
+                key = (normalized["title"], normalized["location"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                tests.append(normalized)
 
     return tests
 

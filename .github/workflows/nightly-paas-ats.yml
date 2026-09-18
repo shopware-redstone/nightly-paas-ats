@@ -338,7 +338,7 @@ jobs:
 
       - name: Run ATS Platform suite
         working-directory: shopware/tests/acceptance
-run: PLAYWRIGHT_JSON_OUTPUT_FILE=test-results/test-results.json npx playwright test --workers=1 --project=Platform --shard=${{ matrix.shard }}/${{ matrix.total_shards }} --reporter=json,html
+        run: PLAYWRIGHT_JSON_OUTPUT_FILE=test-results/test-results.json npx playwright test --workers=1 --project=Platform --shard=${{ matrix.shard }}/${{ matrix.total_shards }} --reporter=json,html
 
       - name: Upload Playwright artifacts
         if: always()

@@ -28,6 +28,7 @@ jobs:
   update-and-deploy:
     name: Update and deploy ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     env:
       DEPLOY_STAGE: Checkout target branch
       DEPLOY_DECISION: pending
@@ -211,12 +212,13 @@ jobs:
           commit_sha="$(git rev-parse HEAD)"
           max_attempts=3
           retry_delay_seconds=120
+          deploy_timeout_minutes=25
 
           for attempt in $(seq 1 "$max_attempts"); do
             echo "::group::PaaS deploy attempt ${attempt}/${max_attempts}"
             echo "Updating application ${SW_PAAS_APPLICATION} in project ${SW_PAAS_PROJECT_ID} to ${commit_sha}."
 
-            if sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery application update \
+            if timeout "${deploy_timeout_minutes}m" sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery application update \
               --token "$SW_PAAS_TOKEN" \
               --application "$SW_PAAS_APPLICATION" \
               --commit-sha "$commit_sha"; then

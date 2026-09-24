@@ -270,9 +270,11 @@ jobs:
               fi
 
               if [[ -n "${APP_URL:-}" ]]; then
-                # curl already prints 000 on a connection failure, so do not add another.
-                http_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL%/}/?cb=${RANDOM}" 2>/dev/null || true)"
-                http_code="${http_code:-000}"
+                # Assign 000 only when curl itself fails, and let -sS report why on
+                # stderr; `|| echo 000` would append to the 000 curl already prints.
+                if ! http_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL%/}/?cb=${RANDOM}")"; then
+                  http_code=000
+                fi
                 if [[ "$http_code" == "200" ]]; then
                   store_http_ok=true
                 fi

@@ -244,7 +244,7 @@ jobs:
                 application deployment get \
                 --token "$SW_PAAS_TOKEN" \
                 --application "$SW_PAAS_APPLICATION" 2>&1 || true)"
-              printf '%s\n' "$deployment_state" | tail -40
+              printf '%s\n' "$deployment_state"
               echo "::endgroup::"
 
               # Only treat the deployment as complete when all three hold: the current

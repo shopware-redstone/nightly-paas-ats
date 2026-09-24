@@ -238,27 +238,56 @@ jobs:
               # DEPLOYING_STORE_SUCCESS reconcile pair, which the CLI does not treat as
               # terminal, so the watch can time out on a deployment that completed
               # successfully. Exit code 124 therefore means the watch was killed, not
-              # that the deployment failed: record the deployment state and verify the
-              # store before spending another attempt on it.
+              # that the deployment failed.
               echo "::group::Deployment state after watch timeout"
-              sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery \
+              deployment_state="$(sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery \
                 application deployment get \
                 --token "$SW_PAAS_TOKEN" \
-                --application "$SW_PAAS_APPLICATION" 2>&1 | tail -40 || true
+                --application "$SW_PAAS_APPLICATION" 2>&1 || true)"
+              printf '%s\n' "$deployment_state" | tail -40
               echo "::endgroup::"
 
+              # Only treat the deployment as complete when all three hold: the current
+              # deployment is the commit we asked for, PaaS reports the store as running,
+              # and the store answers. A 200 alone proves nothing — when a rollout does
+              # not converge, the PREVIOUS deployment keeps serving 200 from the old
+              # build, which would let ATS pass against code that never deployed.
+              # Anything we cannot positively confirm falls through to the retry path.
+              deployed_commit_ok=false
+              store_state_ok=false
+              store_http_ok=false
+              http_code="not probed"
+
+              if printf '%s\n' "$deployment_state" | grep -qi -- "$commit_sha"; then
+                deployed_commit_ok=true
+              fi
+
+              # Only the CLI's own header line carries the DEPLOYMENT_STATUS_ prefix;
+              # the status history repeats the bare state names, so this matches the
+              # current state rather than any state the deployment passed through.
+              if printf '%s\n' "$deployment_state" | grep -q -- 'DEPLOYMENT_STATUS_DEPLOYING_STORE_SUCCESS'; then
+                store_state_ok=true
+              fi
+
               if [[ -n "${APP_URL:-}" ]]; then
-                http_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL}/?cb=${RANDOM}" || echo 000)"
+                # curl already prints 000 on a connection failure, so do not add another.
+                http_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL%/}/?cb=${RANDOM}" 2>/dev/null || true)"
+                http_code="${http_code:-000}"
                 if [[ "$http_code" == "200" ]]; then
-                  echo "::warning title=PaaS deploy watch timed out::sw-paas stopped watching after ${deploy_timeout_minutes} minutes, but ${APP_URL} returns 200; treating the deployment as complete."
-                  echo "DEPLOY_STAGE=Deployment completed (watch timed out, store verified)" >> "$GITHUB_ENV"
-                  echo "::endgroup::"
-                  exit 0
+                  store_http_ok=true
                 fi
-                attempt_result="${attempt_result}; store returned HTTP ${http_code}"
               else
                 echo "::warning title=Store not verified::APP_URL is not configured for ${SW_PAAS_APPLICATION}; cannot verify the store after a watch timeout."
               fi
+
+              if [[ "$deployed_commit_ok" == true && "$store_state_ok" == true && "$store_http_ok" == true ]]; then
+                echo "::warning title=PaaS deploy watch timed out::sw-paas stopped watching after ${deploy_timeout_minutes} minutes, but ${SW_PAAS_APPLICATION} reports ${commit_sha} as the current deployment with the store running and ${APP_URL} returns 200; treating the deployment as complete."
+                echo "DEPLOY_STAGE=Deployment completed (watch timed out, deployment verified)" >> "$GITHUB_ENV"
+                echo "::endgroup::"
+                exit 0
+              fi
+
+              attempt_result="${attempt_result}; verification: commit_deployed=${deployed_commit_ok} store_running=${store_state_ok} http=${http_code}"
             else
               attempt_result="exited with code ${exit_code}"
             fi

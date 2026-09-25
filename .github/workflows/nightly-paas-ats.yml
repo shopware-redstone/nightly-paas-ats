@@ -197,6 +197,7 @@ jobs:
           SW_PAAS_ORGANIZATION_ID: ${{ vars.SW_PAAS_ORGANIZATION_ID }}
           SW_PAAS_PROJECT_ID: ${{ vars.SW_PAAS_PROJECT_ID }}
           SW_PAAS_APPLICATION: ${{ matrix.application }}
+          APP_URL: ${{ vars[format('ATS_APP_URL_{0}', matrix.ats_config_suffix)] || secrets[format('ATS_APP_URL_{0}', matrix.ats_config_suffix)] }}
         run: |
           set -euo pipefail
           echo "DEPLOY_STAGE=Shopware PaaS application update" >> "$GITHUB_ENV"
@@ -231,6 +232,64 @@ jobs:
 
             if [[ "$exit_code" -eq 124 ]]; then
               attempt_result="timed out after ${deploy_timeout_minutes} minutes"
+
+              # `application update` watches the deployment until it reports a terminal
+              # state. A healthy deployment settles into the DEPLOYING_STORE /
+              # DEPLOYING_STORE_SUCCESS reconcile pair, which the CLI does not treat as
+              # terminal, so the watch can time out on a deployment that completed
+              # successfully. Exit code 124 therefore means the watch was killed, not
+              # that the deployment failed.
+              echo "::group::Deployment state after watch timeout"
+              deployment_state="$(sw-paas --state-home "$SW_PAAS_STATE_HOME" --show-ids --skip-project-discovery \
+                application deployment get \
+                --token "$SW_PAAS_TOKEN" \
+                --application "$SW_PAAS_APPLICATION" 2>&1 || true)"
+              printf '%s\n' "$deployment_state"
+              echo "::endgroup::"
+
+              # Only treat the deployment as complete when all three hold: the current
+              # deployment is the commit we asked for, PaaS reports the store as running,
+              # and the store answers. A 200 alone proves nothing — when a rollout does
+              # not converge, the PREVIOUS deployment keeps serving 200 from the old
+              # build, which would let ATS pass against code that never deployed.
+              # Anything we cannot positively confirm falls through to the retry path.
+              deployed_commit_ok=false
+              store_state_ok=false
+              store_http_ok=false
+              http_code="not probed"
+
+              if printf '%s\n' "$deployment_state" | grep -qi -- "$commit_sha"; then
+                deployed_commit_ok=true
+              fi
+
+              # Only the CLI's own header line carries the DEPLOYMENT_STATUS_ prefix;
+              # the status history repeats the bare state names, so this matches the
+              # current state rather than any state the deployment passed through.
+              if printf '%s\n' "$deployment_state" | grep -q -- 'DEPLOYMENT_STATUS_DEPLOYING_STORE_SUCCESS'; then
+                store_state_ok=true
+              fi
+
+              if [[ -n "${APP_URL:-}" ]]; then
+                # Assign 000 only when curl itself fails, and let -sS report why on
+                # stderr; `|| echo 000` would append to the 000 curl already prints.
+                if ! http_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "${APP_URL%/}/?cb=${RANDOM}")"; then
+                  http_code=000
+                fi
+                if [[ "$http_code" == "200" ]]; then
+                  store_http_ok=true
+                fi
+              else
+                echo "::warning title=Store not verified::APP_URL is not configured for ${SW_PAAS_APPLICATION}; cannot verify the store after a watch timeout."
+              fi
+
+              if [[ "$deployed_commit_ok" == true && "$store_state_ok" == true && "$store_http_ok" == true ]]; then
+                echo "::warning title=PaaS deploy watch timed out::sw-paas stopped watching after ${deploy_timeout_minutes} minutes, but ${SW_PAAS_APPLICATION} reports ${commit_sha} as the current deployment with the store running and ${APP_URL} returns 200; treating the deployment as complete."
+                echo "DEPLOY_STAGE=Deployment completed (watch timed out, deployment verified)" >> "$GITHUB_ENV"
+                echo "::endgroup::"
+                exit 0
+              fi
+
+              attempt_result="${attempt_result}; verification: commit_deployed=${deployed_commit_ok} store_running=${store_state_ok} http=${http_code}"
             else
               attempt_result="exited with code ${exit_code}"
             fi

@@ -5319,16 +5319,16 @@
         },
         {
             "name": "phpdocumentor/type-resolver",
-            "version": "2.0.0",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/TypeResolver.git",
-                "reference": "327a05bbee54120d4786a0dc67aad30226ad4cf9"
+                "reference": "dbe2133bb23e2e33a6834f4ed417f24a1b167769"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/327a05bbee54120d4786a0dc67aad30226ad4cf9",
-                "reference": "327a05bbee54120d4786a0dc67aad30226ad4cf9",
+                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/dbe2133bb23e2e33a6834f4ed417f24a1b167769",
+                "reference": "dbe2133bb23e2e33a6834f4ed417f24a1b167769",
                 "shasum": ""
             },
             "require": {
@@ -5371,9 +5371,9 @@
             "description": "A PSR-5 based resolver of Class names, Types and Structural Element Names",
             "support": {
                 "issues": "https://github.com/phpDocumentor/TypeResolver/issues",
-                "source": "https://github.com/phpDocumentor/TypeResolver/tree/2.0.0"
+                "source": "https://github.com/phpDocumentor/TypeResolver/tree/2.1.0"
             },
-            "time": "2026-01-06T21:53:42+00:00"
+            "time": "2026-09-27T19:32:54+00:00"
         },
         {
             "name": "phpseclib/phpseclib",
@@ -7177,12 +7177,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "de721a5147ebf72a6c1d583c4576c55d0dcd771e"
+                "reference": "81a69ce87cc3ef8a750279b5643e0a3b1adbcaf1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/de721a5147ebf72a6c1d583c4576c55d0dcd771e",
-                "reference": "de721a5147ebf72a6c1d583c4576c55d0dcd771e",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/81a69ce87cc3ef8a750279b5643e0a3b1adbcaf1",
+                "reference": "81a69ce87cc3ef8a750279b5643e0a3b1adbcaf1",
                 "shasum": ""
             },
             "require": {
@@ -7418,7 +7418,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-09-25T20:08:10+00:00"
+            "time": "2026-09-28T18:42:35+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

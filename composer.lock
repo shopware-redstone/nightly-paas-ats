@@ -6890,16 +6890,16 @@
         },
         {
             "name": "setasign/tfpdf",
-            "version": "v1.33",
+            "version": "v1.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Setasign/tFPDF.git",
-                "reference": "050de12ab5359ce475dab49bae5cedbcf455f708"
+                "reference": "69b06444b929e0d54ffbb5efcadfe97ecbad831b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Setasign/tFPDF/zipball/050de12ab5359ce475dab49bae5cedbcf455f708",
-                "reference": "050de12ab5359ce475dab49bae5cedbcf455f708",
+                "url": "https://api.github.com/repos/Setasign/tFPDF/zipball/69b06444b929e0d54ffbb5efcadfe97ecbad831b",
+                "reference": "69b06444b929e0d54ffbb5efcadfe97ecbad831b",
                 "shasum": ""
             },
             "type": "library",
@@ -6928,7 +6928,7 @@
                     "homepage": "http://fpdf.org/"
                 }
             ],
-            "description": "This class is a modified version of FPDF that adds UTF-8 support. As of version 1.31 it is based on FPDF 1.82. Before it was based on FPDF 1.7.",
+            "description": "This class is a modified version of FPDF that adds UTF-8 support. The latest version is based on FPDF 1.85.",
             "homepage": "http://fpdf.org/en/script/script92.php",
             "keywords": [
                 "fpdf",
@@ -6938,9 +6938,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Setasign/tFPDF/issues",
-                "source": "https://github.com/Setasign/tFPDF/tree/v1.33"
+                "source": "https://github.com/Setasign/tFPDF/tree/v1.34"
             },
-            "time": "2022-12-20T10:26:07+00:00"
+            "time": "2026-10-12T08:18:19+00:00"
         },
         {
             "name": "shopware/conflicts",
@@ -7177,12 +7177,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "e07cac93a943519a2ce1f56686f7add02a2b6f3f"
+                "reference": "c66225b1f5bd8e613a7fa019838f15b08c19a4df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/e07cac93a943519a2ce1f56686f7add02a2b6f3f",
-                "reference": "e07cac93a943519a2ce1f56686f7add02a2b6f3f",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/c66225b1f5bd8e613a7fa019838f15b08c19a4df",
+                "reference": "c66225b1f5bd8e613a7fa019838f15b08c19a4df",
                 "shasum": ""
             },
             "require": {
@@ -7418,7 +7418,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-10-09T13:21:55+00:00"
+            "time": "2026-10-12T16:43:59+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

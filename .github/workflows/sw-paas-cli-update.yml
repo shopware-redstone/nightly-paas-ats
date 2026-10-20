@@ -24,8 +24,6 @@ jobs:
 
       - name: Check latest sw-paas release
         id: sw_paas
-        env:
-          GH_TOKEN: ${{ secrets.PAAS_CLI_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -38,7 +36,6 @@ jobs:
 
           curl -fsSL \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
             "https://api.github.com/repos/shopware/sw-paas/releases/latest" \
             -o "$release_json"
 

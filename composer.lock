@@ -279,16 +279,16 @@
         },
         {
             "name": "composer/ca-bundle",
-            "version": "1.5.14",
+            "version": "1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/ca-bundle.git",
-                "reference": "0c8abba0634f637bd78c4e451981da368d403463"
+                "reference": "2c99cf2e92516985dea4914812b93d9daf01cdd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/0c8abba0634f637bd78c4e451981da368d403463",
-                "reference": "0c8abba0634f637bd78c4e451981da368d403463",
+                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/2c99cf2e92516985dea4914812b93d9daf01cdd6",
+                "reference": "2c99cf2e92516985dea4914812b93d9daf01cdd6",
                 "shasum": ""
             },
             "require": {
@@ -335,7 +335,7 @@
             "support": {
                 "irc": "irc://irc.freenode.org/composer",
                 "issues": "https://github.com/composer/ca-bundle/issues",
-                "source": "https://github.com/composer/ca-bundle/tree/1.5.14"
+                "source": "https://github.com/composer/ca-bundle/tree/1.6.0"
             },
             "funding": [
                 {
@@ -347,7 +347,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-21T14:57:29+00:00"
+            "time": "2026-10-20T20:14:05+00:00"
         },
         {
             "name": "composer/class-map-generator",
@@ -2526,16 +2526,16 @@
         },
         {
             "name": "horstoeko/zugferd",
-            "version": "v1.0.132",
+            "version": "v1.0.133",
             "source": {
                 "type": "git",
                 "url": "https://github.com/horstoeko/zugferd.git",
-                "reference": "5bb8ad1ea5e27ab9ccb3132f2668e4f54823fbbc"
+                "reference": "7ae81641e2ca1992b5b0afbce00309ed4d989e4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/horstoeko/zugferd/zipball/5bb8ad1ea5e27ab9ccb3132f2668e4f54823fbbc",
-                "reference": "5bb8ad1ea5e27ab9ccb3132f2668e4f54823fbbc",
+                "url": "https://api.github.com/repos/horstoeko/zugferd/zipball/7ae81641e2ca1992b5b0afbce00309ed4d989e4c",
+                "reference": "7ae81641e2ca1992b5b0afbce00309ed4d989e4c",
                 "shasum": ""
             },
             "require": {
@@ -2563,7 +2563,7 @@
                 "goetas-webservices/xsd2php": "^0",
                 "nette/php-generator": "*",
                 "php-parallel-lint/php-parallel-lint": "^1.4",
-                "phpdocumentor/reflection-docblock": "^5",
+                "phpdocumentor/reflection-docblock": "^6",
                 "phpstan/phpstan": "^1|^2.1",
                 "phpstan/phpstan-deprecation-rules": "^1|^2",
                 "phpstan/phpstan-strict-rules": "^1|^2",
@@ -2598,9 +2598,15 @@
             ],
             "support": {
                 "issues": "https://github.com/horstoeko/zugferd/issues",
-                "source": "https://github.com/horstoeko/zugferd/tree/v1.0.132"
+                "source": "https://github.com/horstoeko/zugferd/tree/v1.0.133"
             },
-            "time": "2026-08-30T14:11:24+00:00"
+            "funding": [
+                {
+                    "url": "https://paypal.me/horstoeko",
+                    "type": "custom"
+                }
+            ],
+            "time": "2026-10-20T12:44:04+00:00"
         },
         {
             "name": "jms/metadata",
@@ -7177,12 +7183,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "219491014944c6b6463cf6426c7001adea8dae0d"
+                "reference": "08a0d07b12a63f62370706fd52ebac235b18c5de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/219491014944c6b6463cf6426c7001adea8dae0d",
-                "reference": "219491014944c6b6463cf6426c7001adea8dae0d",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/08a0d07b12a63f62370706fd52ebac235b18c5de",
+                "reference": "08a0d07b12a63f62370706fd52ebac235b18c5de",
                 "shasum": ""
             },
             "require": {
@@ -7418,7 +7424,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-10-19T19:45:03+00:00"
+            "time": "2026-10-20T19:48:32+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
@@ -14005,16 +14011,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "6.17.1",
+            "version": "6.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "1c179b500667e70f998d6a4ef0af96386af3d032"
+                "reference": "c93b7430193dc461602a2a3f4f6a0791a3a0608a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/1c179b500667e70f998d6a4ef0af96386af3d032",
-                "reference": "1c179b500667e70f998d6a4ef0af96386af3d032",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/c93b7430193dc461602a2a3f4f6a0791a3a0608a",
+                "reference": "c93b7430193dc461602a2a3f4f6a0791a3a0608a",
                 "shasum": ""
             },
             "require": {
@@ -14083,7 +14089,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/6.17.1"
+                "source": "https://github.com/zircote/swagger-php/tree/6.18.0"
             },
             "funding": [
                 {
@@ -14091,7 +14097,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-19T19:53:44+00:00"
+            "time": "2026-10-20T22:51:12+00:00"
         }
     ],
     "packages-dev": [],

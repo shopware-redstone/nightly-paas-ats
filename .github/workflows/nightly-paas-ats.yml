@@ -2,8 +2,8 @@ name: Nightly PaaS ATS
 
 on:
   schedule:
-    # Scheduled nightly at 05:00 UTC. GitHub may start later.
-    - cron: "0 5 * * *"
+    # Scheduled nightly at 04:00 UTC (07:00 GMT+3). GitHub may start later.
+   - cron: "0 4 * * *"
   workflow_dispatch:
     inputs:
       force:

@@ -246,7 +246,7 @@ jobs:
             PENDING) reason="build is still PENDING in the PaaS build queue" ;;
             RUNNING) reason="build is still RUNNING" ;;
             FAILED)  reason="build FAILED; see sw-paas application build logs" ;;
-            SUCCESS) reason="build succeeded; the deployment/rollout phase failed" ;;
+            SUCCESS) reason="build succeeded; deployment completion was not confirmed" ;;
             *)       reason="build status unknown" ;;
           esac
 

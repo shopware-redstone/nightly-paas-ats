@@ -2039,20 +2039,20 @@
         },
         {
             "name": "grpc/grpc",
-            "version": "1.82.0",
+            "version": "1.85.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/grpc/grpc-php.git",
-                "reference": "be984cb608f21e96453b3cfe54c748cc7b192250"
+                "reference": "9c61b0afe526a88857953a7f9e40cf97463097aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/grpc/grpc-php/zipball/be984cb608f21e96453b3cfe54c748cc7b192250",
-                "reference": "be984cb608f21e96453b3cfe54c748cc7b192250",
+                "url": "https://api.github.com/repos/grpc/grpc-php/zipball/9c61b0afe526a88857953a7f9e40cf97463097aa",
+                "reference": "9c61b0afe526a88857953a7f9e40cf97463097aa",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1.0"
+                "php": ">=8.2.0"
             },
             "require-dev": {
                 "google/auth": "^v1.3.0"
@@ -2077,9 +2077,9 @@
                 "rpc"
             ],
             "support": {
-                "source": "https://github.com/grpc/grpc-php/tree/v1.82.0"
+                "source": "https://github.com/grpc/grpc-php/tree/v1.85.1"
             },
-            "time": "2026-07-03T09:39:53+00:00"
+            "time": "2026-10-27T16:48:12+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -5496,16 +5496,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "2.3.8",
+            "version": "2.3.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "ec4293f7caf9936acce286b589ccb84faf1aa88d"
+                "reference": "2c122d2f890ae4b9e6ede898a9ac36b2c07e2a17"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/ec4293f7caf9936acce286b589ccb84faf1aa88d",
-                "reference": "ec4293f7caf9936acce286b589ccb84faf1aa88d",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/2c122d2f890ae4b9e6ede898a9ac36b2c07e2a17",
+                "reference": "2c122d2f890ae4b9e6ede898a9ac36b2c07e2a17",
                 "shasum": ""
             },
             "require": {
@@ -5537,9 +5537,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.8"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.9"
             },
-            "time": "2026-10-26T20:24:50+00:00"
+            "time": "2026-10-27T22:32:31+00:00"
         },
         {
             "name": "psr/cache",
@@ -7185,12 +7185,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "2bb45b6094165de9a472df5d15336cc75ac55b92"
+                "reference": "e5fe13024916bb1dedcc918cdb5d2ff66604b75d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/2bb45b6094165de9a472df5d15336cc75ac55b92",
-                "reference": "2bb45b6094165de9a472df5d15336cc75ac55b92",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/e5fe13024916bb1dedcc918cdb5d2ff66604b75d",
+                "reference": "e5fe13024916bb1dedcc918cdb5d2ff66604b75d",
                 "shasum": ""
             },
             "require": {
@@ -7348,7 +7348,7 @@
                 "phpdocumentor/reflection-docblock": "^5.6.4",
                 "phpdocumentor/type-resolver": "^1.7.1",
                 "phpstan/extension-installer": "^1.4.3",
-                "phpstan/phpdoc-parser": "^2.0.0",
+                "phpstan/phpdoc-parser": "2.3.6",
                 "phpstan/phpstan": "2.3.1",
                 "phpstan/phpstan-deprecation-rules": "2.0.5",
                 "phpstan/phpstan-phpunit": "2.1.1",
@@ -7426,7 +7426,7 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-10-26T16:21:28+00:00"
+            "time": "2026-10-27T21:50:48+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
@@ -14013,16 +14013,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "6.19.0",
+            "version": "6.20.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "f0c95a868bf4fcd06df16abaffe356214aa052b2"
+                "reference": "c5fbe8d763787c2b65787b662c3e3bca8f39caf7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/f0c95a868bf4fcd06df16abaffe356214aa052b2",
-                "reference": "f0c95a868bf4fcd06df16abaffe356214aa052b2",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/c5fbe8d763787c2b65787b662c3e3bca8f39caf7",
+                "reference": "c5fbe8d763787c2b65787b662c3e3bca8f39caf7",
                 "shasum": ""
             },
             "require": {
@@ -14037,7 +14037,10 @@
                 "symfony/yaml": "^5.4 || ^6.0 || ^7.0 || ^8.0"
             },
             "conflict": {
-                "symfony/process": ">=6, <6.4.14"
+                "symfony/console": "<5.4.35",
+                "symfony/finder": "<5.3.7",
+                "symfony/process": ">=6, <6.4.14",
+                "symfony/string": "<5.4.41"
             },
             "require-dev": {
                 "doctrine/annotations": "^2.0",
@@ -14091,7 +14094,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/6.19.0"
+                "source": "https://github.com/zircote/swagger-php/tree/6.20.0"
             },
             "funding": [
                 {
@@ -14099,7 +14102,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-27T03:06:15+00:00"
+            "time": "2026-10-27T22:01:28+00:00"
         }
     ],
     "packages-dev": [],

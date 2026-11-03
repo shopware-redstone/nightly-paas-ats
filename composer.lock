@@ -5454,16 +5454,16 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.57",
+            "version": "3.0.58",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "d17e0ddaeaf6f22f7e007cbb437d78792fe2a0e4"
+                "reference": "91f3a6436bb84040ac0cf49e761977f17d16a39b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/d17e0ddaeaf6f22f7e007cbb437d78792fe2a0e4",
-                "reference": "d17e0ddaeaf6f22f7e007cbb437d78792fe2a0e4",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/91f3a6436bb84040ac0cf49e761977f17d16a39b",
+                "reference": "91f3a6436bb84040ac0cf49e761977f17d16a39b",
                 "shasum": ""
             },
             "require": {
@@ -5544,7 +5544,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.57"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.58"
             },
             "funding": [
                 {
@@ -5560,8 +5560,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-26T12:13:21+00:00",
-            "published-time": "2026-08-26T12:16:21+00:00"
+            "time": "2026-11-02T10:45:48+00:00",
+            "published-time": "2026-11-02T10:50:21+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -7280,12 +7280,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "8875f4eda211780246c4ad6ff4f34aed3793a848"
+                "reference": "6412149fe4ec18cdd17ac0f97d900555bbf0f43e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/8875f4eda211780246c4ad6ff4f34aed3793a848",
-                "reference": "8875f4eda211780246c4ad6ff4f34aed3793a848",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/6412149fe4ec18cdd17ac0f97d900555bbf0f43e",
+                "reference": "6412149fe4ec18cdd17ac0f97d900555bbf0f43e",
                 "shasum": ""
             },
             "require": {
@@ -7521,8 +7521,8 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-11-02T03:22:54+00:00",
-            "published-time": "2026-11-02T03:38:39+00:00"
+            "time": "2026-11-03T03:35:24+00:00",
+            "published-time": "2026-11-03T03:52:57+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

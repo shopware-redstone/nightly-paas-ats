@@ -7280,12 +7280,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "f5231e83b5dd3bb11b2369a70f4537746dc81618"
+                "reference": "e944b5637850a794aa48c13c2071aaf40b38ad89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/f5231e83b5dd3bb11b2369a70f4537746dc81618",
-                "reference": "f5231e83b5dd3bb11b2369a70f4537746dc81618",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/e944b5637850a794aa48c13c2071aaf40b38ad89",
+                "reference": "e944b5637850a794aa48c13c2071aaf40b38ad89",
                 "shasum": ""
             },
             "require": {
@@ -7440,8 +7440,8 @@
                 "opis/json-schema": "^2.3.0",
                 "phpat/phpat": "0.12.5",
                 "phpbench/phpbench": "^1.6.1",
-                "phpdocumentor/reflection-docblock": "^5.6.4",
-                "phpdocumentor/type-resolver": "^1.7.1",
+                "phpdocumentor/reflection-docblock": "^6.0",
+                "phpdocumentor/type-resolver": "^2.0",
                 "phpstan/extension-installer": "^1.4.3",
                 "phpstan/phpstan": "2.3.5",
                 "phpstan/phpstan-deprecation-rules": "2.0.5",
@@ -7520,8 +7520,8 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-11-05T12:37:59+00:00",
-            "published-time": "2026-11-05T12:53:43+00:00"
+            "time": "2026-11-05T13:45:04+00:00",
+            "published-time": "2026-11-05T14:02:51+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

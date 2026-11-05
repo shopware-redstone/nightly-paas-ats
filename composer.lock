@@ -7280,12 +7280,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "fe39f2e9e1019dd361460604db7e07eca973db3f"
+                "reference": "f5231e83b5dd3bb11b2369a70f4537746dc81618"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/fe39f2e9e1019dd361460604db7e07eca973db3f",
-                "reference": "fe39f2e9e1019dd361460604db7e07eca973db3f",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/f5231e83b5dd3bb11b2369a70f4537746dc81618",
+                "reference": "f5231e83b5dd3bb11b2369a70f4537746dc81618",
                 "shasum": ""
             },
             "require": {
@@ -7443,12 +7443,11 @@
                 "phpdocumentor/reflection-docblock": "^5.6.4",
                 "phpdocumentor/type-resolver": "^1.7.1",
                 "phpstan/extension-installer": "^1.4.3",
-                "phpstan/phpdoc-parser": "2.3.6",
-                "phpstan/phpstan": "2.3.1",
+                "phpstan/phpstan": "2.3.5",
                 "phpstan/phpstan-deprecation-rules": "2.0.5",
                 "phpstan/phpstan-phpunit": "2.1.1",
-                "phpstan/phpstan-strict-rules": "2.1.0",
-                "phpstan/phpstan-symfony": "2.1.0",
+                "phpstan/phpstan-strict-rules": "2.1.1",
+                "phpstan/phpstan-symfony": "2.1.1",
                 "phpunit/phpunit": "^11.5.19",
                 "predis/predis": "^2.2",
                 "rector/type-perfect": "2.2.0",
@@ -7521,8 +7520,8 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-11-04T18:08:36+00:00",
-            "published-time": "2026-11-04T18:25:24+00:00"
+            "time": "2026-11-05T12:37:59+00:00",
+            "published-time": "2026-11-05T12:53:43+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

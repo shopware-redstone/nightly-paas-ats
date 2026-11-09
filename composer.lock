@@ -2561,16 +2561,16 @@
         },
         {
             "name": "horstoeko/zugferd",
-            "version": "v1.0.134",
+            "version": "v1.0.135",
             "source": {
                 "type": "git",
                 "url": "https://github.com/horstoeko/zugferd.git",
-                "reference": "3ced2116cecb5cfb950c4441066338cd71044337"
+                "reference": "b5e2dcc24b5e1b5d5288fd22176923d1c639471e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/horstoeko/zugferd/zipball/3ced2116cecb5cfb950c4441066338cd71044337",
-                "reference": "3ced2116cecb5cfb950c4441066338cd71044337",
+                "url": "https://api.github.com/repos/horstoeko/zugferd/zipball/b5e2dcc24b5e1b5d5288fd22176923d1c639471e",
+                "reference": "b5e2dcc24b5e1b5d5288fd22176923d1c639471e",
                 "shasum": ""
             },
             "require": {
@@ -2633,7 +2633,7 @@
             ],
             "support": {
                 "issues": "https://github.com/horstoeko/zugferd/issues",
-                "source": "https://github.com/horstoeko/zugferd/tree/v1.0.134"
+                "source": "https://github.com/horstoeko/zugferd/tree/v1.0.135"
             },
             "funding": [
                 {
@@ -2641,8 +2641,8 @@
                     "type": "custom"
                 }
             ],
-            "time": "2026-10-29T09:21:40+00:00",
-            "published-time": "2026-10-29T09:41:35+00:00"
+            "time": "2026-11-08T15:28:54+00:00",
+            "published-time": "2026-11-08T15:33:04+00:00"
         },
         {
             "name": "jms/metadata",
@@ -6198,16 +6198,16 @@
         },
         {
             "name": "radebatz/type-info-extras",
-            "version": "1.0.12",
+            "version": "1.0.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DerManoMann/type-info-extras.git",
-                "reference": "7d0f772a5a78671b032cb28ab4d93d92ab222bec"
+                "reference": "925cc0472c1e4611df2a52c00852788ba6c1d7d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DerManoMann/type-info-extras/zipball/7d0f772a5a78671b032cb28ab4d93d92ab222bec",
-                "reference": "7d0f772a5a78671b032cb28ab4d93d92ab222bec",
+                "url": "https://api.github.com/repos/DerManoMann/type-info-extras/zipball/925cc0472c1e4611df2a52c00852788ba6c1d7d4",
+                "reference": "925cc0472c1e4611df2a52c00852788ba6c1d7d4",
                 "shasum": ""
             },
             "require": {
@@ -6218,12 +6218,13 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.70",
                 "phpstan/phpstan": "^2.1",
-                "phpunit/phpunit": "^11.0"
+                "phpunit/phpunit": "^11.0",
+                "rector/rector": "^2.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.x-dev"
+                    "dev-main": "1.x-dev"
                 }
             },
             "autoload": {
@@ -6254,10 +6255,10 @@
             ],
             "support": {
                 "issues": "https://github.com/DerManoMann/type-info-extras/issues",
-                "source": "https://github.com/DerManoMann/type-info-extras/tree/1.0.12"
+                "source": "https://github.com/DerManoMann/type-info-extras/tree/1.0.13"
             },
-            "time": "2026-11-05T21:27:53+00:00",
-            "published-time": "2026-11-05T21:28:02+00:00"
+            "time": "2026-11-08T23:54:24+00:00",
+            "published-time": "2026-11-08T23:57:05+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -14185,16 +14186,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "6.20.2",
+            "version": "6.20.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "fb6f36bc3287e2843d8dc4dff5621b84924d5d8f"
+                "reference": "a1e9d2a9ee09277e4a1a31c26867cde00b896faf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/fb6f36bc3287e2843d8dc4dff5621b84924d5d8f",
-                "reference": "fb6f36bc3287e2843d8dc4dff5621b84924d5d8f",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/a1e9d2a9ee09277e4a1a31c26867cde00b896faf",
+                "reference": "a1e9d2a9ee09277e4a1a31c26867cde00b896faf",
                 "shasum": ""
             },
             "require": {
@@ -14266,7 +14267,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/6.20.2"
+                "source": "https://github.com/zircote/swagger-php/tree/6.20.3"
             },
             "funding": [
                 {
@@ -14274,8 +14275,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-03T19:52:48+00:00",
-            "published-time": "2026-11-03T19:53:17+00:00"
+            "time": "2026-11-08T19:40:34+00:00",
+            "published-time": "2026-11-08T19:42:55+00:00"
         }
     ],
     "packages-dev": [],

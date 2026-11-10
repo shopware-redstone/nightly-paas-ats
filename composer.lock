@@ -2880,16 +2880,16 @@
         },
         {
             "name": "laminas/laminas-code",
-            "version": "4.18.0",
+            "version": "4.19.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-code.git",
-                "reference": "d1ec5de6a87971446cfcc2acbc340c65ca56cee3"
+                "reference": "e8a9f7ccb07319e59f329dc77e3c70b256ae3a87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-code/zipball/d1ec5de6a87971446cfcc2acbc340c65ca56cee3",
-                "reference": "d1ec5de6a87971446cfcc2acbc340c65ca56cee3",
+                "url": "https://api.github.com/repos/laminas/laminas-code/zipball/e8a9f7ccb07319e59f329dc77e3c70b256ae3a87",
+                "reference": "e8a9f7ccb07319e59f329dc77e3c70b256ae3a87",
                 "shasum": ""
             },
             "require": {
@@ -2897,7 +2897,6 @@
             },
             "require-dev": {
                 "boundwize/structarmed": "^0.18.0",
-                "doctrine/annotations": "^2.0.1",
                 "ext-phar": "*",
                 "laminas/laminas-coding-standard": "^3.0.0",
                 "laminas/laminas-stdlib": "^3.18.0",
@@ -2906,7 +2905,6 @@
                 "vimeo/psalm": "^6.17"
             },
             "suggest": {
-                "doctrine/annotations": "Doctrine\\Common\\Annotations >=1.0 for annotation features",
                 "laminas/laminas-stdlib": "Laminas\\Stdlib component"
             },
             "type": "library",
@@ -2940,8 +2938,8 @@
                     "type": "custom"
                 }
             ],
-            "time": "2026-10-26T23:36:20+00:00",
-            "published-time": "2026-10-26T23:37:26+00:00"
+            "time": "2026-11-09T21:21:04+00:00",
+            "published-time": "2026-11-09T21:22:27+00:00"
         },
         {
             "name": "lcobucci/jwt",
@@ -6920,21 +6918,21 @@
         },
         {
             "name": "setasign/fpdi",
-            "version": "v2.6.9",
+            "version": "v2.6.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Setasign/FPDI.git",
-                "reference": "d97ade6368aa0b51b6316d5dc16a567e2bf60167"
+                "reference": "be29a9d43c64f06569c1075f181e43d829a3d5bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Setasign/FPDI/zipball/d97ade6368aa0b51b6316d5dc16a567e2bf60167",
-                "reference": "d97ade6368aa0b51b6316d5dc16a567e2bf60167",
+                "url": "https://api.github.com/repos/Setasign/FPDI/zipball/be29a9d43c64f06569c1075f181e43d829a3d5bb",
+                "reference": "be29a9d43c64f06569c1075f181e43d829a3d5bb",
                 "shasum": ""
             },
             "require": {
                 "ext-zlib": "*",
-                "php": ">=7.2 <=8.6.99999"
+                "php": ">=7.2 <8.7"
             },
             "conflict": {
                 "setasign/tfpdf": "<1.31"
@@ -6979,7 +6977,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Setasign/FPDI/issues",
-                "source": "https://github.com/Setasign/FPDI/tree/v2.6.9"
+                "source": "https://github.com/Setasign/FPDI/tree/v2.6.10"
             },
             "funding": [
                 {
@@ -6987,8 +6985,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-13T07:36:28+00:00",
-            "published-time": "2026-10-13T07:38:42+00:00"
+            "time": "2026-11-09T10:58:35+00:00",
+            "published-time": "2026-11-09T11:01:49+00:00"
         },
         {
             "name": "setasign/tfpdf",
@@ -7281,12 +7279,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "7dae0e437c2749b49befb7576fe56fab9e0276eb"
+                "reference": "6a2cabc9c161707be22b9a16dd2662bee7188ca5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/7dae0e437c2749b49befb7576fe56fab9e0276eb",
-                "reference": "7dae0e437c2749b49befb7576fe56fab9e0276eb",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/6a2cabc9c161707be22b9a16dd2662bee7188ca5",
+                "reference": "6a2cabc9c161707be22b9a16dd2662bee7188ca5",
                 "shasum": ""
             },
             "require": {
@@ -7521,8 +7519,8 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-11-09T06:44:04+00:00",
-            "published-time": "2026-11-09T07:00:43+00:00"
+            "time": "2026-11-09T20:40:34+00:00",
+            "published-time": "2026-11-09T20:58:22+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

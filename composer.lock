@@ -1127,20 +1127,20 @@
         },
         {
             "name": "doctrine/deprecations",
-            "version": "1.1.6",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/deprecations.git",
-                "reference": "d4fe3e6fd9bb9e72557a19674f44d8ac7db4c6ca"
+                "reference": "d2e16653a734c8784c1851ad68b02f997b53ca82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/d4fe3e6fd9bb9e72557a19674f44d8ac7db4c6ca",
-                "reference": "d4fe3e6fd9bb9e72557a19674f44d8ac7db4c6ca",
+                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/d2e16653a734c8784c1851ad68b02f997b53ca82",
+                "reference": "d2e16653a734c8784c1851ad68b02f997b53ca82",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1 || ^8.0"
+                "php": "^7.4 || ^8.0"
             },
             "conflict": {
                 "phpunit/phpunit": "<=7.5 || >=14"
@@ -1169,10 +1169,10 @@
             "homepage": "https://www.doctrine-project.org/",
             "support": {
                 "issues": "https://github.com/doctrine/deprecations/issues",
-                "source": "https://github.com/doctrine/deprecations/tree/1.1.6"
+                "source": "https://github.com/doctrine/deprecations/tree/1.2.0"
             },
-            "time": "2026-02-07T07:09:04+00:00",
-            "published-time": "2026-02-07T07:10:09+00:00"
+            "time": "2026-11-11T10:04:49+00:00",
+            "published-time": "2026-11-11T10:12:24+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -4820,16 +4820,16 @@
         },
         {
             "name": "opis/json-schema",
-            "version": "2.6.1",
+            "version": "2.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/json-schema.git",
-                "reference": "7d8685a78db131eb6a1571cc7b4db8f4b59e8628"
+                "reference": "b87b424da3fbeaab09567910fda48dc88d9dcbd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/json-schema/zipball/7d8685a78db131eb6a1571cc7b4db8f4b59e8628",
-                "reference": "7d8685a78db131eb6a1571cc7b4db8f4b59e8628",
+                "url": "https://api.github.com/repos/opis/json-schema/zipball/b87b424da3fbeaab09567910fda48dc88d9dcbd8",
+                "reference": "b87b424da3fbeaab09567910fda48dc88d9dcbd8",
                 "shasum": ""
             },
             "require": {
@@ -4879,10 +4879,10 @@
             ],
             "support": {
                 "issues": "https://github.com/opis/json-schema/issues",
-                "source": "https://github.com/opis/json-schema/tree/2.6.1"
+                "source": "https://github.com/opis/json-schema/tree/2.6.2"
             },
-            "time": "2026-11-06T04:25:16+00:00",
-            "published-time": "2026-11-06T04:35:54+00:00"
+            "time": "2026-11-08T08:09:42+00:00",
+            "published-time": "2026-11-11T10:35:41+00:00"
         },
         {
             "name": "opis/string",
@@ -6204,16 +6204,16 @@
         },
         {
             "name": "radebatz/type-info-extras",
-            "version": "1.0.13",
+            "version": "1.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DerManoMann/type-info-extras.git",
-                "reference": "925cc0472c1e4611df2a52c00852788ba6c1d7d4"
+                "reference": "08ac334a97e92c890eec6f644a6555fdf225fa8d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DerManoMann/type-info-extras/zipball/925cc0472c1e4611df2a52c00852788ba6c1d7d4",
-                "reference": "925cc0472c1e4611df2a52c00852788ba6c1d7d4",
+                "url": "https://api.github.com/repos/DerManoMann/type-info-extras/zipball/08ac334a97e92c890eec6f644a6555fdf225fa8d",
+                "reference": "08ac334a97e92c890eec6f644a6555fdf225fa8d",
                 "shasum": ""
             },
             "require": {
@@ -6261,10 +6261,10 @@
             ],
             "support": {
                 "issues": "https://github.com/DerManoMann/type-info-extras/issues",
-                "source": "https://github.com/DerManoMann/type-info-extras/tree/1.0.13"
+                "source": "https://github.com/DerManoMann/type-info-extras/tree/1.0.14"
             },
-            "time": "2026-11-08T23:54:24+00:00",
-            "published-time": "2026-11-08T23:57:05+00:00"
+            "time": "2026-11-12T03:41:43+00:00",
+            "published-time": "2026-11-12T03:43:08+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -7287,12 +7287,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "00c4eebc4bec10fca6f7b3ece0b5ad9e6733ee05"
+                "reference": "abb286cd51f3e9730db90efc47b5ad8874dec6df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/00c4eebc4bec10fca6f7b3ece0b5ad9e6733ee05",
-                "reference": "00c4eebc4bec10fca6f7b3ece0b5ad9e6733ee05",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/abb286cd51f3e9730db90efc47b5ad8874dec6df",
+                "reference": "abb286cd51f3e9730db90efc47b5ad8874dec6df",
                 "shasum": ""
             },
             "require": {
@@ -7527,8 +7527,8 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-11-10T22:10:45+00:00",
-            "published-time": "2026-11-10T22:28:12+00:00"
+            "time": "2026-11-12T03:38:27+00:00",
+            "published-time": "2026-11-12T03:55:06+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
@@ -14195,16 +14195,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "6.20.3",
+            "version": "6.20.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "a1e9d2a9ee09277e4a1a31c26867cde00b896faf"
+                "reference": "52063c0fbcc4067c037c05c85378f0b954d099aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/a1e9d2a9ee09277e4a1a31c26867cde00b896faf",
-                "reference": "a1e9d2a9ee09277e4a1a31c26867cde00b896faf",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/52063c0fbcc4067c037c05c85378f0b954d099aa",
+                "reference": "52063c0fbcc4067c037c05c85378f0b954d099aa",
                 "shasum": ""
             },
             "require": {
@@ -14276,7 +14276,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/6.20.3"
+                "source": "https://github.com/zircote/swagger-php/tree/6.20.4"
             },
             "funding": [
                 {
@@ -14284,8 +14284,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-08T19:40:34+00:00",
-            "published-time": "2026-11-08T19:42:55+00:00"
+            "time": "2026-11-11T21:52:50+00:00",
+            "published-time": "2026-11-11T21:56:14+00:00"
         }
     ],
     "packages-dev": [],

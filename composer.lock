@@ -2880,28 +2880,28 @@
         },
         {
             "name": "laminas/laminas-code",
-            "version": "4.19.0",
+            "version": "4.20.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-code.git",
-                "reference": "e8a9f7ccb07319e59f329dc77e3c70b256ae3a87"
+                "reference": "ea2df2daea112c6432ac62aaa9f8750487c5c211"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-code/zipball/e8a9f7ccb07319e59f329dc77e3c70b256ae3a87",
-                "reference": "e8a9f7ccb07319e59f329dc77e3c70b256ae3a87",
+                "url": "https://api.github.com/repos/laminas/laminas-code/zipball/ea2df2daea112c6432ac62aaa9f8750487c5c211",
+                "reference": "ea2df2daea112c6432ac62aaa9f8750487c5c211",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0"
+                "php": "~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0"
             },
             "require-dev": {
-                "boundwize/structarmed": "^0.18.0",
+                "boundwize/structarmed": "^0.21.0",
                 "ext-phar": "*",
                 "laminas/laminas-coding-standard": "^3.0.0",
                 "laminas/laminas-stdlib": "^3.18.0",
                 "phpunit/phpunit": "^10.5.58",
-                "psalm/plugin-phpunit": "^0.19.0",
+                "psalm/plugin-phpunit": "^0.22.0",
                 "vimeo/psalm": "^6.17"
             },
             "suggest": {
@@ -2938,8 +2938,8 @@
                     "type": "custom"
                 }
             ],
-            "time": "2026-11-09T21:21:04+00:00",
-            "published-time": "2026-11-09T21:22:27+00:00"
+            "time": "2026-11-19T13:11:05+00:00",
+            "published-time": "2026-11-19T13:11:55+00:00"
         },
         {
             "name": "lcobucci/jwt",
@@ -7286,12 +7286,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "5f67373191d5a7ad7028a2047731ea127638d9fc"
+                "reference": "4cf8d19319165ee929b8d0e8b46452d0772a2af5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/5f67373191d5a7ad7028a2047731ea127638d9fc",
-                "reference": "5f67373191d5a7ad7028a2047731ea127638d9fc",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/4cf8d19319165ee929b8d0e8b46452d0772a2af5",
+                "reference": "4cf8d19319165ee929b8d0e8b46452d0772a2af5",
                 "shasum": ""
             },
             "require": {
@@ -7527,8 +7527,8 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-11-19T03:02:58+00:00",
-            "published-time": "2026-11-19T03:20:43+00:00"
+            "time": "2026-11-19T12:55:46+00:00",
+            "published-time": "2026-11-19T13:11:15+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",

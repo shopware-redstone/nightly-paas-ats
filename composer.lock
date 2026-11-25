@@ -426,16 +426,16 @@
         },
         {
             "name": "composer/composer",
-            "version": "2.11.2",
+            "version": "2.11.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "12c820dbc3f030954b1d09f5884fcf1e9d29d6cb"
+                "reference": "e4a580d4d41edb0eb5a470f441c9780ba49df75f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/12c820dbc3f030954b1d09f5884fcf1e9d29d6cb",
-                "reference": "12c820dbc3f030954b1d09f5884fcf1e9d29d6cb",
+                "url": "https://api.github.com/repos/composer/composer/zipball/e4a580d4d41edb0eb5a470f441c9780ba49df75f",
+                "reference": "e4a580d4d41edb0eb5a470f441c9780ba49df75f",
                 "shasum": ""
             },
             "require": {
@@ -525,7 +525,7 @@
                 "irc": "ircs://irc.libera.chat:6697/composer",
                 "issues": "https://github.com/composer/composer/issues",
                 "security": "https://github.com/composer/composer/security/policy",
-                "source": "https://github.com/composer/composer/tree/2.11.2"
+                "source": "https://github.com/composer/composer/tree/2.11.3"
             },
             "funding": [
                 {
@@ -537,8 +537,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-10T09:09:37+00:00",
-            "published-time": "2026-11-10T09:12:59+00:00"
+            "time": "2026-11-24T09:14:18+00:00",
+            "published-time": "2026-11-24T09:17:33+00:00"
         },
         {
             "name": "composer/metadata-minifier",
@@ -2814,16 +2814,16 @@
         },
         {
             "name": "justinrainbow/json-schema",
-            "version": "6.14.0",
+            "version": "6.15.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jsonrainbow/json-schema.git",
-                "reference": "bae415e135dd68260c2d020ba392850231e9b1ab"
+                "reference": "24021a898c17193ed7c2111b5fbf1c6486ae85ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jsonrainbow/json-schema/zipball/bae415e135dd68260c2d020ba392850231e9b1ab",
-                "reference": "bae415e135dd68260c2d020ba392850231e9b1ab",
+                "url": "https://api.github.com/repos/jsonrainbow/json-schema/zipball/24021a898c17193ed7c2111b5fbf1c6486ae85ff",
+                "reference": "24021a898c17193ed7c2111b5fbf1c6486ae85ff",
                 "shasum": ""
             },
             "require": {
@@ -2873,10 +2873,16 @@
             ],
             "support": {
                 "issues": "https://github.com/jsonrainbow/json-schema/issues",
-                "source": "https://github.com/jsonrainbow/json-schema/tree/6.14.0"
+                "source": "https://github.com/jsonrainbow/json-schema/tree/6.15.1"
             },
-            "time": "2026-10-24T08:53:34+00:00",
-            "published-time": "2026-10-24T08:53:38+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/DannyvdSluijs",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-11-24T20:35:12+00:00",
+            "published-time": "2026-11-24T20:35:18+00:00"
         },
         {
             "name": "laminas/laminas-code",
@@ -4820,16 +4826,16 @@
         },
         {
             "name": "opis/json-schema",
-            "version": "2.6.2",
+            "version": "2.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/json-schema.git",
-                "reference": "b87b424da3fbeaab09567910fda48dc88d9dcbd8"
+                "reference": "fa37275e1604aee00d2868a22c432302e4455751"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/json-schema/zipball/b87b424da3fbeaab09567910fda48dc88d9dcbd8",
-                "reference": "b87b424da3fbeaab09567910fda48dc88d9dcbd8",
+                "url": "https://api.github.com/repos/opis/json-schema/zipball/fa37275e1604aee00d2868a22c432302e4455751",
+                "reference": "fa37275e1604aee00d2868a22c432302e4455751",
                 "shasum": ""
             },
             "require": {
@@ -4879,23 +4885,23 @@
             ],
             "support": {
                 "issues": "https://github.com/opis/json-schema/issues",
-                "source": "https://github.com/opis/json-schema/tree/2.6.2"
+                "source": "https://github.com/opis/json-schema/tree/2.6.3"
             },
-            "time": "2026-11-08T08:09:42+00:00",
-            "published-time": "2026-11-11T10:35:41+00:00"
+            "time": "2026-11-24T20:14:32+00:00",
+            "published-time": "2026-11-24T20:18:28+00:00"
         },
         {
             "name": "opis/string",
-            "version": "2.1.0",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/string.git",
-                "reference": "3e4d2aaff518ac518530b89bb26ed40f4503635e"
+                "reference": "56523d2610f4bf77b7400644b4cadf578b157a11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/string/zipball/3e4d2aaff518ac518530b89bb26ed40f4503635e",
-                "reference": "3e4d2aaff518ac518530b89bb26ed40f4503635e",
+                "url": "https://api.github.com/repos/opis/string/zipball/56523d2610f4bf77b7400644b4cadf578b157a11",
+                "reference": "56523d2610f4bf77b7400644b4cadf578b157a11",
                 "shasum": ""
             },
             "require": {
@@ -4942,23 +4948,23 @@
             ],
             "support": {
                 "issues": "https://github.com/opis/string/issues",
-                "source": "https://github.com/opis/string/tree/2.1.0"
+                "source": "https://github.com/opis/string/tree/2.2.0"
             },
-            "time": "2025-10-17T12:38:41+00:00",
-            "published-time": "2025-10-17T12:40:48+00:00"
+            "time": "2026-11-24T21:41:01+00:00",
+            "published-time": "2026-11-24T21:46:44+00:00"
         },
         {
             "name": "opis/uri",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/uri.git",
-                "reference": "0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a"
+                "reference": "d3d5d7fd43acb178d5dc16d2e1b18b2ab8235c47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/uri/zipball/0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a",
-                "reference": "0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a",
+                "url": "https://api.github.com/repos/opis/uri/zipball/d3d5d7fd43acb178d5dc16d2e1b18b2ab8235c47",
+                "reference": "d3d5d7fd43acb178d5dc16d2e1b18b2ab8235c47",
                 "shasum": ""
             },
             "require": {
@@ -5006,10 +5012,10 @@
             ],
             "support": {
                 "issues": "https://github.com/opis/uri/issues",
-                "source": "https://github.com/opis/uri/tree/1.1.0"
+                "source": "https://github.com/opis/uri/tree/1.2.0"
             },
-            "time": "2021-05-22T15:57:08+00:00",
-            "published-time": "2021-05-22T16:01:15+00:00"
+            "time": "2026-11-24T20:01:02+00:00",
+            "published-time": "2026-11-24T20:08:31+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -7052,20 +7058,20 @@
         },
         {
             "name": "shopware/conflicts",
-            "version": "0.6.3",
+            "version": "0.6.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/conflicts.git",
-                "reference": "8632a31f9e47eab32e7212f1d1529227648f9bee"
+                "reference": "4f251cc9d8dd40a1ed38a1d3945ab1d55e0b649f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/conflicts/zipball/8632a31f9e47eab32e7212f1d1529227648f9bee",
-                "reference": "8632a31f9e47eab32e7212f1d1529227648f9bee",
+                "url": "https://api.github.com/repos/shopware/conflicts/zipball/4f251cc9d8dd40a1ed38a1d3945ab1d55e0b649f",
+                "reference": "4f251cc9d8dd40a1ed38a1d3945ab1d55e0b649f",
                 "shasum": ""
             },
             "require": {
-                "shopware/core": ">=6.7.15.0"
+                "shopware/core": ">=6.7.16.0"
             },
             "conflict": {
                 "phenx/php-font-lib": "<0.5.5",
@@ -7083,10 +7089,10 @@
             "description": "Shopware 6 conflicting packages",
             "support": {
                 "issues": "https://github.com/shopware/conflicts/issues",
-                "source": "https://github.com/shopware/conflicts/tree/0.6.3"
+                "source": "https://github.com/shopware/conflicts/tree/0.6.4"
             },
-            "time": "2026-09-18T13:39:29+00:00",
-            "published-time": "2026-09-18T13:40:00+00:00"
+            "time": "2026-11-24T14:05:23+00:00",
+            "published-time": "2026-11-24T14:05:46+00:00"
         },
         {
             "name": "shopware/deployment-helper",
@@ -7286,12 +7292,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "f30df8d3f62ff40b7ee6fff65a0baa995fec9067"
+                "reference": "e75a3ab5d6e114145bbc76a3d4ddbc177795c5f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/f30df8d3f62ff40b7ee6fff65a0baa995fec9067",
-                "reference": "f30df8d3f62ff40b7ee6fff65a0baa995fec9067",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/e75a3ab5d6e114145bbc76a3d4ddbc177795c5f6",
+                "reference": "e75a3ab5d6e114145bbc76a3d4ddbc177795c5f6",
                 "shasum": ""
             },
             "require": {
@@ -7361,7 +7367,7 @@
                 "scssphp/scssphp": "v1.12.0",
                 "setasign/fpdi": "^2.3.7",
                 "setasign/tfpdf": "^1.33",
-                "shopware/conflicts": "0.6.3",
+                "shopware/conflicts": "0.6.4",
                 "shyim/opensearch-php-dsl": "^1.1.4",
                 "squirrelphp/twig-php-syntax": "^1.13.0",
                 "symfony/asset": "~7.4.0",
@@ -7425,7 +7431,7 @@
                 "symfony/yaml": "~7.4.23",
                 "twig/intl-extra": "^3.26.0",
                 "twig/string-extra": "^3.24.0",
-                "twig/twig": "^3.29.0",
+                "twig/twig": "^3.31.1",
                 "zircote/swagger-php": "^6.4"
             },
             "replace": {
@@ -7527,8 +7533,8 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-11-23T18:39:30+00:00",
-            "published-time": "2026-11-23T18:56:00+00:00"
+            "time": "2026-11-25T03:05:39+00:00",
+            "published-time": "2026-11-25T03:22:33+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
@@ -14047,16 +14053,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.31.0",
+            "version": "v3.31.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "fdcda27cbcd5880ddc2c4c2dc5858fb9ea8a0cda"
+                "reference": "6f6ec372231b53d1d564567a78beb8844cafa132"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/fdcda27cbcd5880ddc2c4c2dc5858fb9ea8a0cda",
-                "reference": "fdcda27cbcd5880ddc2c4c2dc5858fb9ea8a0cda",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/6f6ec372231b53d1d564567a78beb8844cafa132",
+                "reference": "6f6ec372231b53d1d564567a78beb8844cafa132",
                 "shasum": ""
             },
             "require": {
@@ -14111,7 +14117,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.31.0"
+                "source": "https://github.com/twigphp/Twig/tree/v3.31.1"
             },
             "funding": [
                 {
@@ -14123,8 +14129,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-11-23T16:31:30+00:00",
-            "published-time": "2026-11-23T16:31:44+00:00"
+            "time": "2026-11-24T12:48:40+00:00",
+            "published-time": "2026-11-24T12:48:53+00:00"
         },
         {
             "name": "webmozart/assert",

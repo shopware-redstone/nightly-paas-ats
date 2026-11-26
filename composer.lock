@@ -4117,16 +4117,16 @@
         },
         {
             "name": "nyholm/psr7",
-            "version": "1.8.2",
+            "version": "1.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Nyholm/psr7.git",
-                "reference": "a71f2b11690f4b24d099d6b16690a90ae14fc6f3"
+                "reference": "26c1581611614447a5ff753a450390a23f3e323e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Nyholm/psr7/zipball/a71f2b11690f4b24d099d6b16690a90ae14fc6f3",
-                "reference": "a71f2b11690f4b24d099d6b16690a90ae14fc6f3",
+                "url": "https://api.github.com/repos/Nyholm/psr7/zipball/26c1581611614447a5ff753a450390a23f3e323e",
+                "reference": "26c1581611614447a5ff753a450390a23f3e323e",
                 "shasum": ""
             },
             "require": {
@@ -4179,7 +4179,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Nyholm/psr7/issues",
-                "source": "https://github.com/Nyholm/psr7/tree/1.8.2"
+                "source": "https://github.com/Nyholm/psr7/tree/1.8.3"
             },
             "funding": [
                 {
@@ -4191,8 +4191,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-09-09T07:06:30+00:00",
-            "published-time": "2024-09-09T07:07:05+00:00"
+            "time": "2026-11-26T08:19:16+00:00",
+            "published-time": "2026-11-26T08:20:50+00:00"
         },
         {
             "name": "nyholm/psr7-server",
@@ -7288,12 +7288,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shopware/shopware.git",
-                "reference": "8c0f3b8c9d12fa8b04be355912668dfc21863095"
+                "reference": "85069046fa44e01d2b74f0171032034f56efd72d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/8c0f3b8c9d12fa8b04be355912668dfc21863095",
-                "reference": "8c0f3b8c9d12fa8b04be355912668dfc21863095",
+                "url": "https://api.github.com/repos/shopware/shopware/zipball/85069046fa44e01d2b74f0171032034f56efd72d",
+                "reference": "85069046fa44e01d2b74f0171032034f56efd72d",
                 "shasum": ""
             },
             "require": {
@@ -7529,8 +7529,8 @@
                 "source": "https://github.com/shopware/shopware/tree/trunk",
                 "wiki": "https://developer.shopware.com"
             },
-            "time": "2026-11-25T15:40:51+00:00",
-            "published-time": "2026-11-25T16:00:20+00:00"
+            "time": "2026-11-26T10:01:02+00:00",
+            "published-time": "2026-11-26T10:17:15+00:00"
         },
         {
             "name": "shyim/opensearch-php-dsl",
